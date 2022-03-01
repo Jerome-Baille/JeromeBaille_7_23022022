@@ -1,0 +1,23 @@
+{
+  "name": "groupomania",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jerome Baille",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.2.3",
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.2",
+    "email-validator": "^2.0.4",
+    "express": "^4.17.3",
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.3",
+    "password-validator": "^5.2.1",
+    "sequelize": "^6.17.0"
+  }
+}
