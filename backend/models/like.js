@@ -10,15 +10,15 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      models.User.belongsToMany(models.Message, {
+      models.User.belongsToMany(models.Post, {
         through: models.Like,
         foreignkey: 'userId',
-        otherKey: 'messageId',
+        otherKey: 'postId',
       });
 
-      models.Message.belongsToMany(models.User, {
+      models.Post.belongsToMany(models.User, {
         through: models.Like,
-        foreignkey: 'messageId',
+        foreignkey: 'postId',
         otherKey: 'userId',
       });      
 
@@ -27,17 +27,17 @@ module.exports = (sequelize, DataTypes) => {
         as: 'user',
       });
 
-      models.Like.belongsTo(models.Message, {
-        foreignKey: 'messageId',
-        as: 'message',
+      models.Like.belongsTo(models.Post, {
+        foreignKey: 'postId',
+        as: 'post',
       });
     };
   }
   Like.init({
-    // messageId: {
+    // postId: {
     //   type: DataTypes.INTEGER,
     //   references: {
-    //     model: 'Message',
+    //     model: 'Post',
     //     key: 'id'
     //   }
     // },
@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
     //   }
     // }
     userId: DataTypes.INTEGER,
-    messageId: DataTypes.INTEGER,
+    postId: DataTypes.INTEGER,
     like: DataTypes.INTEGER
   }, {
     sequelize,

@@ -8,7 +8,7 @@ const TITLE_LIMIT   = 2;
 const CONTENT_LIMIT = 4;
 
 // Create a Post
-exports.createMessage = (req, res, next) => {
+exports.createPost = (req, res, next) => {
       // Getting auth header
       var headerAuth  = req.headers['authorization'];
       var userId      = jwtUtils.getUserId(headerAuth);
@@ -30,17 +30,17 @@ exports.createMessage = (req, res, next) => {
     })
     .then(function(userFound){
         if (userFound){
-            models.Message.create({
+            models.Post.create({
                 title  : title,
                 content: content,
                 likes  : 0,
                 UserId : userFound.id
               })
-            .then(function(newMessage){
-                if (newMessage) {
-                    return res.status(201).json(newMessage);
+            .then(function(newPost){
+                if (newPost) {
+                    return res.status(201).json(newPost);
                   } else {
-                    return res.status(500).json({ 'error': 'cannot post message' });
+                    return res.status(500).json({ 'error': 'cannot create a post' });
                   }
                 })
             .catch(function(err) {
@@ -55,15 +55,15 @@ exports.createMessage = (req, res, next) => {
     })
 };
 
-// Read one or all messages
-exports.getOneMessage = (req, res, next) => {
-  models.Message.findOne({
+// Read one or all posts
+exports.getOnePost = (req, res, next) => {
+  models.Post.findOne({
     where : { id: req.params.id },
-  }).then((message) => {
-    if (message) {
-      res.status(200).json(message);
+  }).then((post) => {
+    if (post) {
+      res.status(200).json(post);
     } else {
-      res.status(404).json({ "error": "no messages found" });
+      res.status(404).json({ "error": "no posts found" });
     }
   }).catch(function(err) {
     console.log(err);
@@ -71,26 +71,22 @@ exports.getOneMessage = (req, res, next) => {
   });
 };
 
-exports.getAllMessages = (req, res, next) => {
+exports.getAllPosts = (req, res, next) => {
         var fields  = req.query.fields;
         var limit   = parseInt(req.query.limit);
         var offset  = parseInt(req.query.offset);
         var order   = req.query.order;
 
-        models.Message.findAll({
+        models.Post.findAll({
             order: [(order != null) ? order.split(':') : ['title', 'ASC']],
             attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
             limit: (!isNaN(limit)) ? limit : null,
             offset: (!isNaN(offset)) ? offset : null,
-            include: [{
-              model: models.User,
-              attributes: [ 'username' ]
-            }]
-          }).then(function(messages) {
-            if (messages) {
-              res.status(200).json(messages);
+          }).then(function(posts) {
+            if (posts) {
+              res.status(200).json(posts);
             } else {
-              res.status(404).json({ "error": "no messages found" });
+              res.status(404).json({ "error": "no posts found" });
             }
           }).catch(function(err) {
             console.log(err);
@@ -98,36 +94,36 @@ exports.getAllMessages = (req, res, next) => {
           });
 };
 
-// Update Message
-exports.updateMessage = (req, res, next) => {
+// Update Post
+exports.updatePost = (req, res, next) => {
   // Getting auth header
   var headerAuth  = req.headers['authorization'];
   var userId      = jwtUtils.getUserId(headerAuth);
   var isAdmin = req.body.isAdmin;
 
-  models.Message.findOne({
+  models.Post.findOne({
     where: {id: req.params.id}
   })
 
-  .then(function(messageFound){
-    if (isAdmin === 1 || messageFound.userId === userId){
-      const messageObject = req.file
+  .then(function(postFound){
+    if (isAdmin === 1 || postFound.userId === userId){
+      const postObject = req.file
       ? {
-          ...req.body.message,
-          messageUrl: `${req.protocol}://${req.get("host")}/images/${
+          ...req.body.post,
+          postUrl: `${req.protocol}://${req.get("host")}/images/${
             req.file.filename
           }`,
         }
       : { ...req.body };
 
-      models.Message.update(
-        { ...messageObject, id: req.params.id },
+      models.Post.update(
+        { ...postObject, id: req.params.id },
         { where: { id: req.params.id } }
       )
-        .then(() => res.status(200).json({ message: "Message modifié !" }))
+        .then(() => res.status(200).json({ post: "Post modifié !" }))
         .catch((error) => res.status(400).json({ error }));
     } else {
-      return res.status(403).json({error: `Vous n'êtes pas autorisé à modifier ce message`})
+      return res.status(403).json({error: `Vous n'êtes pas autorisé à modifier ce post`})
     }
   })
   .catch(function(err) {
@@ -135,30 +131,30 @@ exports.updateMessage = (req, res, next) => {
   });
 };
 
-// Delete Message
-exports.deleteMessage = (req, res, next) => {
+// Delete Post
+exports.deletePost = (req, res, next) => {
     // Getting auth header
     var headerAuth  = req.headers['authorization'];
     var userId      = jwtUtils.getUserId(headerAuth);
 
-    models.Message.findOne({
+    models.Post.findOne({
       where: {id: req.params.id}
   })
 
-  .then(function(messageFound){
-      if(messageFound) {
+  .then(function(postFound){
+      if(postFound) {
           var isAdmin = req.body.isAdmin;
-          if (isAdmin === 1 || messageFound.userId === userId){
-              var image = messageFound.attachement;
+          if (isAdmin === 1 || postFound.userId === userId){
+              var image = postFound.attachement;
               fs.unlink(`${image}`, () => {
-                  messageFound.destroy()
+                postFound.destroy()
               })
-              return res.status(201).json({message: 'Message supprimé'});
+              return res.status(201).json({post: 'Post supprimé'});
           }else {
-              return res.status(403).json({error: `Vous n'êtes pas autorisé à supprimer ce message`})
+              return res.status(403).json({error: `Vous n'êtes pas autorisé à supprimer ce post`})
           }
       } else {
-          return res.status(403).json({ error: `Ce message n'est pas dans notre base de donné` + err});
+          return res.status(403).json({ error: `Ce post n'est pas dans notre base de donné` + err});
       }
   })
   .catch(function(err) {
