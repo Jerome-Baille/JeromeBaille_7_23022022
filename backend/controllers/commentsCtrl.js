@@ -2,6 +2,7 @@
 var models = require('../models');
 var jwtUtils = require('../utils/jwt.utils');
 
+// Create a Comment
 exports.createComment = (req, res, next) => {
       // Getting auth header
       var headerAuth  = req.headers['authorization'];
@@ -43,6 +44,22 @@ exports.createComment = (req, res, next) => {
         })
 };
 
+// Read one or all posts
+exports.getOneComment = (req, res, next) => {
+  models.Comment.findOne({
+    where : { id: req.params.commentId },
+  }).then((comment) => {
+    if (comment) {
+      res.status(200).json(comment);
+    } else {
+      res.status(404).json({ "error": "no comments found" });
+    }
+  }).catch(function(err) {
+    console.log(err);
+    res.status(500).json({ "error": err });
+  });
+};
+
 exports.getAllComments = (req, res, next) => {
         var fields = req.query.fields;
         var limit = parseInt(req.query.limit);
@@ -68,6 +85,7 @@ exports.getAllComments = (req, res, next) => {
           });
 }
 
+// Update a Comment
 exports.updateComment = (req, res, next) => {
   // Getting auth header
   var headerAuth  = req.headers['authorization'];
@@ -104,6 +122,7 @@ exports.updateComment = (req, res, next) => {
   });
 };
 
+// Delete a Comment
 exports.deleteComments = (req, res, next) => {
         // récupérer l'autorisation
         var headerAuth  = req.headers['authorization'];
