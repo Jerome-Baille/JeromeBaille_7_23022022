@@ -33,7 +33,6 @@ exports.createPost = (req, res, next) => {
             models.Post.create({
                 title  : title,
                 content: content,
-                likes  : 0,
                 UserId : userFound.id
               })
             .then(function(newPost){
@@ -82,13 +81,15 @@ exports.getAllPosts = (req, res, next) => {
             attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
             limit: (!isNaN(limit)) ? limit : null,
             offset: (!isNaN(offset)) ? offset : null,
-          }).then(function(posts) {
+          })
+          .then(function(posts) {
             if (posts) {
               res.status(200).json(posts);
             } else {
               res.status(404).json({ "error": "no posts found" });
             }
-          }).catch(function(err) {
+          })
+          .catch(function(err) {
             console.log(err);
             res.status(500).json({ "error": "invalid fields" });
           });
@@ -154,10 +155,10 @@ exports.deletePost = (req, res, next) => {
               return res.status(403).json({error: `Vous n'êtes pas autorisé à supprimer ce post`})
           }
       } else {
-          return res.status(403).json({ error: `Ce post n'est pas dans notre base de donné` + err});
+          return res.status(403).json({ error: `Ce post n'est pas dans notre base de donné`});
       }
   })
   .catch(function(err) {
-      return res.status(500).json ({ error : `Impossible de vérifier l'utilisateur` + err })
+      return res.status(500).json ({ error : `Impossible de vérifier l'utilisateur` })
   });
 };
