@@ -33,6 +33,7 @@ exports.createPost = (req, res, next) => {
             models.Post.create({
                 title  : title,
                 content: content,
+                attachment: `${req.protocol}://${req.get('host')}/images/${req.file}`,
                 UserId : userFound.id
               })
             .then(function(newPost){
@@ -77,11 +78,12 @@ exports.getAllPosts = (req, res, next) => {
         var order   = req.query.order;
 
         models.Post.findAll({
-            order: [(order != null) ? order.split(':') : ['title', 'ASC']],
-            attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
-            limit: (!isNaN(limit)) ? limit : null,
-            offset: (!isNaN(offset)) ? offset : null,
-          })
+          where: {isActive: true},
+          order: [(order != null) ? order.split(':') : ['updatedAt', 'DESC']],
+          attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
+          limit: (!isNaN(limit)) ? limit : null,
+          offset: (!isNaN(offset)) ? offset : null,
+        })
           .then(function(posts) {
             if (posts) {
               res.status(200).json(posts);
@@ -110,10 +112,8 @@ exports.updatePost = (req, res, next) => {
     if (isAdmin === 1 || postFound.userId === userId){
       const postObject = req.file
       ? {
-          ...req.body.post,
-          postUrl: `${req.protocol}://${req.get("host")}/images/${
-            req.file.filename
-          }`,
+          ...req.body.postFound,
+          attachment: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
         }
       : { ...req.body };
 
@@ -146,7 +146,7 @@ exports.deletePost = (req, res, next) => {
       if(postFound) {
           var isAdmin = req.body.isAdmin;
           if (isAdmin === 1 || postFound.userId === userId){
-              var image = postFound.attachement;
+              var image = postFound.attachment;
               fs.unlink(`${image}`, () => {
                 postFound.destroy()
               })
