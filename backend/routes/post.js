@@ -8,10 +8,10 @@ const postCtrl = require('../controllers/postCtrl');
 const likeCtrl = require('../controllers/likesCtrl');
 const commentsCtrl = require('../controllers/commentsCtrl');
 
-router.post('/', auth, multer, postCtrl.createPost);
-router.get('/:id', auth, postCtrl.getOnePost);
-router.get('/', auth, postCtrl.getAllPosts);
-router.put('/:id', auth, /* multer, */ postCtrl.updatePost);
+router.post('/', /*auth,*/ multer, postCtrl.createPost);
+router.get('/:id', /*auth,*/ postCtrl.getOnePost);
+router.get('/', /*auth,*/ postCtrl.getAllPosts);
+router.put('/:id', auth, multer, postCtrl.updatePost);
 router.delete('/:id', auth, postCtrl.deletePost);
 
 router.post('/:id/like', auth, likeCtrl.likePost);

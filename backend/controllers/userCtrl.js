@@ -18,7 +18,7 @@ schemaPassword
 .has().digits(1)                // Must have at least 1 digit
 
 // Signup
-exports.signup = (req, res, next) => {
+exports.register = (req, res, next) => {
     // Params
     var email       = req.body.email;
     var username    = req.body.username;
@@ -84,41 +84,158 @@ exports.login = (req, res, next) => {
     var password    = req.body.password;
 
     if (email == null || password == null) {
-        return res.status(400).json({'error': 'missing parameters'});
+        return res.status(400).json({message: `Veuillez renseigner les champs 'Email' et 'Password'`});
     }
 
-    // verify mail regex and password length
     User.findOne({
         where: {email: email}
     })
     .then(function(userFound){
-        if (userFound) {
-            bcrypt.compare(password, userFound.password, function(errBycrypt, resBycrypt){
-                if (resBycrypt) {
-                    return res.status(200).json({
-                        'userId': userFound.id,
-                        'token': jwtUtils.generateTokenForUser(userFound)
-                    });
-                } else {
-                    return res.status(403).json({'error': 'invalid password'});
-                }
-            });
-        } else {
-            return res.status(404).json({'error': 'user not exists in DB'});
+        if (!userFound){
+            return res.status(401).json({message: `Nous n'avons pas trouvé de compte correspondant à l'adresse e-mail renseignée.`});
         }
+        bcrypt.compare(password, userFound.password)
+        .then(valid => {
+          if (!valid) {
+            return res.status(401).json({message : `Le mot de passe renseigné est incorrect.` });
+          }
+          const token = jwt.sign({
+                userId: userFound.id,
+                isAdmin: userFound.isAdmin
+            },
+            "RANDOM_TOKEN_SECRET",
+            { expiresIn: '1h' }
+            );
+            res.cookie('jwt', token)
+            res.status(200).json({
+                'userId': userFound.id,
+                'token': token
+            })
+        })
+        .catch(error => res.status(500).json({ error }));
+
+
+                // return res.status(200).json({
+                //     'userId': userFound.id,
+                //     'token': jwtUtils.generateTokenForUser(userFound)
+                // });
+        //     }
+        // });
+
     })
     .catch(function(err){
-        return res.status(500).json({'error': 'unable to verify user'});
+        return res.status(500).json({message: 'unable to verify user'});
     });
 };
 
+// Logout
+exports.logout = (req, res, next) => {
+    return res
+        .clearCookie("jwt", {domain: 'localhost', path: '/'})
+        .status(200)
+        .json({message : `Compte déconnecté avec succès`});
+};
+
+// Grant admin privileges
+exports.grantAdmin = (req, res, next) => {
+    // Getting auth header
+    var headerAuth  = req.headers['authorization'];
+    var userId      = jwtUtils.getUserId(headerAuth);
+
+    // Params
+    var isAdmin = req.isAdmin;
+    
+    User.findOne({
+        where: {id: userId}
+    })
+    .then(function (user){
+        if (user){
+            if (user.isAdmin === true) {
+                User.findOne({
+                    where: {id: req.params.id}
+                })
+                .then(function(userKing){
+                    userKing.update({
+                        isAdmin: true,
+                    })
+                })
+                .catch(function(err){
+                    return res.status(500).json({'error': 'Unable to give the admin rights to this user'});
+                })
+                return res.status(200).json({'message': `the user has now admin rights`});
+            } else {
+                return res.status(403).json({'error': 'You cannot access this profile'});
+            }
+        } else {
+            return res.status(404).json({'error' : 'user not found'});
+        }
+    })
+    .catch(function(err){
+        return res.status(500).json({ 'error': 'unable to verify user' });
+    })
+};
+
+// Revoke admin privileges
+exports.revokeAdmin = (req, res, next) => {
+    // Getting auth header
+    var headerAuth  = req.headers['authorization'];
+    var userId      = jwtUtils.getUserId(headerAuth);
+
+    // Params
+    var isAdmin = req.isAdmin;
+    
+    User.findOne({
+        where: {id: userId}
+    })
+    .then(function (user){
+        if (user){
+            if (user.isAdmin === true) {
+                User.findOne({
+                    where: {id: req.params.id}
+                })
+                .then(function(userKing){
+                    userKing.update({
+                        isAdmin: false,
+                    })
+                })
+                .catch(function(err){
+                    return res.status(500).json({'error': 'Unable to give the admin rights to this user'});
+                })
+                return res.status(200).json({'message': `the user lost admin rights`});
+            } else {
+                return res.status(403).json({'error': 'You cannot access this profile'});
+            }
+        } else {
+            return res.status(404).json({'error' : 'user not found'});
+        }
+    })
+    .catch(function(err){
+        return res.status(500).json({ 'error': 'unable to verify user' });
+    })
+};
+
+// Get all users
+exports.getAllUsers = (req, res, next) => {
+    User.findAll({
+        attributes: ['id', 'email', 'username', 'bio', 'isAdmin']
+    })
+    .then(function(userFound){
+        if (userFound) {
+            return res.status(200).json(userFound)
+        } else {
+            return res.status(404).json({'error': 'No users found'})
+        }
+    })
+    .catch(function(err){
+        return res.status(500).json(err)
+    })
+};
 
 // Read user profile
 exports.getUserProfile = (req, res, next) => {
     // Getting auth header
     var headerAuth  = req.headers['authorization'];
     var userId      = jwtUtils.getUserId(headerAuth);
-    var isAdmin = req.body.isAdmin;
 
     if (userId < 0)
         return res.status(400).json({'error': 'wrong token'});
@@ -129,11 +246,20 @@ exports.getUserProfile = (req, res, next) => {
     })
     .then(function(user){
         if (user){
-            if (user.id === userId || isAdmin === 1) {
-                res.status(201).json(user);
-            } else {
-                res.status(403).json({'error': 'You cannot access this profile'});
-            }
+            User.findOne({
+                where: {id: userId}
+            })
+            .then(function(userFound){
+                if (user.id === userId || userFound.isAdmin === true) {
+                    res.status(201).json(user);
+                } else {
+                    res.status(403).json({'error': 'You cannot access this profile'});
+                }
+            })
+            .catch(function(err){
+                return res.status(500).json({ 'error': 'unable to verify user' });
+            })
+            
         } else {
             res.status(404).json({'error': 'user not found'})
         }
@@ -161,7 +287,7 @@ exports.updateUserProfile = (req, res, next) => {
     })
     .then(function (userFound){
         if (userFound){
-            if (userFound.id === userId || isAdmin === 1) {
+            if (userFound.id === userId || isAdmin === true) {
                 if (email) {
                     if (emailValidator.validate(email)) {
                         userFound.update({
@@ -213,7 +339,7 @@ exports.updateUsername = (req, res, next) => {
     })
     .then(function (user){
         if (user){
-            if (user.id === userId || isAdmin === 1) {
+            if (user.id === userId || isAdmin === true) {
                 User.findOne({
                     where: {username: username}
                 })
@@ -248,19 +374,26 @@ exports.deleteUserProfile = (req, res, next) => {
     // Getting auth header
     var headerAuth  = req.headers['authorization'];
     var userId      = jwtUtils.getUserId(headerAuth);
-    var isAdmin = req.body.isAdmin;
 
     User.findOne({
         where: {id: req.params.id}
     })
     .then(function (userFound){
         if (userFound){
-            if (userFound.id === userId || isAdmin === 1) {
-                userFound.destroy()
-                return res.status(200).json({'message': `Your account has been deleted`});
-            } else {
-                return res.status(403).json({'error': 'You cannot access this profile'});
-            }
+            User.findOne({
+                where: {id: userId}
+            })
+            .then(function(userRight){
+                if (userFound.id === userId || userRight.isAdmin === true) {
+                    userFound.destroy()
+                    return res.status(200).json({'message': `Your account has been deleted`});
+                } else {
+                    return res.status(403).json({'error': 'You cannot access this profile'});
+                }
+            })
+            .catch(function(err){
+                return res.status(500).json({ 'error': 'unable to verify user' });
+            })
         } else {
             return res.status(404).json({'error' : 'user not found'});
         }

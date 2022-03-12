@@ -59,6 +59,7 @@ exports.createPost = (req, res, next) => {
 exports.getOnePost = (req, res, next) => {
   models.Post.findOne({
     where : { id: req.params.id },
+    include: models.User
   }).then((post) => {
     if (post) {
       res.status(200).json(post);
