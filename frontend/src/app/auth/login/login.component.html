@@ -1,0 +1,35 @@
+<!-- <div class="container">
+  <div class="form">
+    <form #userForm="ngForm" (ngSubmit)="onSubmit(userForm)" novalidate class="login-form">
+      <label for="email"></label>
+      <input type="email" name="email" placeholder="Email" ngModel>
+      <label for="password"></label>
+      <input type="password" name="password" placeholder="Password" ngModel>
+      <button type="submit" class="btn">Login</button>
+      <p class="message">New User? <a routerLink="/register">Create an account</a></p>
+    </form>
+  </div>
+</div> -->
+
+<div class="form-card">
+  <h2>Login</h2>
+  <form [formGroup]="loginForm">   
+    <div class="form-group">
+        <label for="email">Email </label>
+        <input id="email" type="email" formControlName="email">
+    </div>
+    <div class="form-group">
+        <label for="password">Password </label>
+        <input id="password" type="password" formControlName="password">
+    </div>
+    <div class="action-buttons">
+        <button type="submit" (click)="onLogin()" [disabled]="loginForm.invalid">Enregistrer</button>
+    </div>
+    <p class="alert-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+  </form>
+</div>
+
+<div class="form-card">
+  <button type="submit" (click)="onLogout()">Logout</button>
+  <p class="alert-msg" *ngIf="returnMsg">{{ returnMsg }}</p>
+</div>
