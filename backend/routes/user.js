@@ -1,22 +1,21 @@
-const express = require('express');
-const router = express.Router();
-const auth = require('../middleware/auth');
+const express   = require('express');
+const router    = express.Router();
+const auth      = require('../middleware/auth');
 
-const userCtrl   = require('../controllers/userCtrl');
+const userCtrl  = require('../controllers/userCtrl');
 
 // Users routes
-router.get('/', userCtrl.getAllUsers);
 router.post('/register', userCtrl.register);
 router.post('/login', userCtrl.login);
-router.get('/logout', userCtrl.logout);
+router.get('/logout', auth, userCtrl.logout);
 
-
-router.get('/:id/', userCtrl.getUserProfile);
-router.put('/:id/username', userCtrl.updateUsername);
-router.delete('/:id/', userCtrl.deleteUserProfile);
-router.put('/:id/', userCtrl.updateUserProfile);
-router.put('/:id/grant', userCtrl.grantAdmin);
-router.put('/:id/revoke', userCtrl.revokeAdmin);
+router.get('/', auth, userCtrl.getAllUsers);
+router.get('/:id/', auth, userCtrl.getUserProfile);
+router.put('/:id/', auth, userCtrl.updateUserProfile);
+router.put('/:id/username', auth, userCtrl.updateUsername);
+router.delete('/:id/', auth, userCtrl.deleteUserProfile);
+router.put('/:id/grant', auth, userCtrl.grantAdmin);
+router.put('/:id/revoke', auth, userCtrl.revokeAdmin);
 
 
 module.exports = router;

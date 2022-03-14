@@ -1,10 +1,10 @@
 // Imports
-var bcrypt      = require('bcrypt');
-var jwtUtils    = require('../utils/jwt.utils');
-const User = require('../models').User;
+const jwt               = require('jsonwebtoken');
+var bcrypt              = require('bcrypt');
+const User              = require('../models').User;
 const passwordValidator = require('password-validator'); // A library to simplify the rules of password validation, by taking away all the repeated parts and by providing a readable and maintainable API to use
-const emailValidator = require("email-validator"); // Makes sure that the email address is valid
-const jwt = require('jsonwebtoken');
+const emailValidator    = require("email-validator"); // Makes sure that the email address is valid
+
 
 // Create a schema for the passwords
 var schemaPassword = new passwordValidator();
@@ -17,7 +17,7 @@ schemaPassword
 .has().lowercase()              // Must have lowercase letters
 .has().digits(1)                // Must have at least 1 digit
 
-// Signup
+// Register
 exports.register = (req, res, next) => {
     // Params
     var email       = req.body.email;
@@ -52,15 +52,15 @@ exports.register = (req, res, next) => {
                                     })
                                 })
                                 .catch(function(err){
-                                    return res.status(500).json({'error': 'cannot add user'});
+                                    return res.status(500).json({message: `Création du compte impossible. Veuillez rééssayer.`});
                                 });
                             });
                         } else {
-                            return res.status(409).json({'error': `L'adresse e-mail est déjà utilisée`});
+                            return res.status(409).json({message: `L'adresse e-mail est déjà utilisée`});
                         }
                     })
                     .catch(function(err){
-                        return res.status(500).json({'error': 'unable to verify user'});
+                        return res.status(500).json({message: err});
                     });
                 } else {
                     return res.status(401).json({message : `Le mot de passe doit contenir au moins 8 caractères et être composé d'au moins 1 majuscule, 1 minuscule et 1 chiffre.`}); 
@@ -69,11 +69,11 @@ exports.register = (req, res, next) => {
                 return res.status(401).json({message : `L'adresse e-mail saisie est invalide. Veuillez entrer une adresse e-mail valide.`}); 
             }
         } else {
-            return res.status(500).json({'error': `Le pseudo choisi existe déjà. Merci d'en choisir un autre.`});
+            return res.status(500).json({message: `Le pseudo choisi existe déjà. Merci d'en choisir un autre.`});
         }
     })
     .catch(function(err){
-        return res.status(500).json({'error': 'unable to verify user'});
+        return res.status(500).json({message: err});
     });
 };
 
@@ -106,25 +106,19 @@ exports.login = (req, res, next) => {
             "RANDOM_TOKEN_SECRET",
             { expiresIn: '1h' }
             );
-            res.cookie('jwt', token)
-            res.status(200).json({
-                'userId': userFound.id,
-                'token': token
-            })
+            return res
+                .cookie('jwt', token /*, {httpOnly: true}*/)
+                .status(200)
+                .json({
+                    message: 'Vous êtes connecté',
+                    'userId': userFound.id,
+                    'token': token
+                })
         })
         .catch(error => res.status(500).json({ error }));
-
-
-                // return res.status(200).json({
-                //     'userId': userFound.id,
-                //     'token': jwtUtils.generateTokenForUser(userFound)
-                // });
-        //     }
-        // });
-
     })
     .catch(function(err){
-        return res.status(500).json({message: 'unable to verify user'});
+        return res.status(500).json({message: err});
     });
 };
 
@@ -138,160 +132,132 @@ exports.logout = (req, res, next) => {
 
 // Grant admin privileges
 exports.grantAdmin = (req, res, next) => {
-    // Getting auth header
-    var headerAuth  = req.headers['authorization'];
-    var userId      = jwtUtils.getUserId(headerAuth);
-
     // Params
-    var isAdmin = req.isAdmin;
-    
-    User.findOne({
-        where: {id: userId}
-    })
-    .then(function (user){
-        if (user){
-            if (user.isAdmin === true) {
-                User.findOne({
-                    where: {id: req.params.id}
+    var tokenIsAdmin    = req.auth.isAdmin;
+    var paramId         = req.params.id;
+
+    if (tokenIsAdmin == true){
+        User.findOne({
+            where: {id: paramId}
+        })
+        .then(function(user){
+            if (user){
+                user.update({
+                    isAdmin: true,
                 })
-                .then(function(userKing){
-                    userKing.update({
-                        isAdmin: true,
-                    })
-                })
-                .catch(function(err){
-                    return res.status(500).json({'error': 'Unable to give the admin rights to this user'});
-                })
-                return res.status(200).json({'message': `the user has now admin rights`});
+                return res.status(200).json({message: `L'utilisateur dispose à présent des droits administrateurs.`})
             } else {
-                return res.status(403).json({'error': 'You cannot access this profile'});
+                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
             }
-        } else {
-            return res.status(404).json({'error' : 'user not found'});
-        }
-    })
-    .catch(function(err){
-        return res.status(500).json({ 'error': 'unable to verify user' });
-    })
+        })
+        .catch(function(err){
+            res.status(500).json({message: err});
+        });
+    } else {
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à effectuer cette action.`})
+    }
 };
 
 // Revoke admin privileges
 exports.revokeAdmin = (req, res, next) => {
-    // Getting auth header
-    var headerAuth  = req.headers['authorization'];
-    var userId      = jwtUtils.getUserId(headerAuth);
-
     // Params
-    var isAdmin = req.isAdmin;
-    
-    User.findOne({
-        where: {id: userId}
-    })
-    .then(function (user){
-        if (user){
-            if (user.isAdmin === true) {
-                User.findOne({
-                    where: {id: req.params.id}
+    var tokenIsAdmin    = req.auth.isAdmin;
+    var paramId         = req.params.id;
+
+    if (tokenIsAdmin == true){
+        User.findOne({
+            where: {id: paramId}
+        })
+        .then(function(user){
+            if (user){
+                user.update({
+                    isAdmin: false,
                 })
-                .then(function(userKing){
-                    userKing.update({
-                        isAdmin: false,
-                    })
-                })
-                .catch(function(err){
-                    return res.status(500).json({'error': 'Unable to give the admin rights to this user'});
-                })
-                return res.status(200).json({'message': `the user lost admin rights`});
+                return res.status(200).json({message: `Les droits administrateurs ont été retiré à l'utilisateur.`})
             } else {
-                return res.status(403).json({'error': 'You cannot access this profile'});
+                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
             }
-        } else {
-            return res.status(404).json({'error' : 'user not found'});
-        }
-    })
-    .catch(function(err){
-        return res.status(500).json({ 'error': 'unable to verify user' });
-    })
+        })
+        .catch(function(err){
+            res.status(500).json({message: err});
+        });
+    } else {
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à effectuer cette action.`})
+    }
 };
 
 // Get all users
 exports.getAllUsers = (req, res, next) => {
-    User.findAll({
-        attributes: ['id', 'email', 'username', 'bio', 'isAdmin']
-    })
-    .then(function(userFound){
-        if (userFound) {
-            return res.status(200).json(userFound)
-        } else {
-            return res.status(404).json({'error': 'No users found'})
-        }
-    })
-    .catch(function(err){
-        return res.status(500).json(err)
-    })
+    // Params
+    var tokenIsAdmin    = req.auth.isAdmin;
+
+    if (tokenIsAdmin == true){
+        User.findAll({
+            attributes: ['id', 'email', 'username', 'bio', 'isAdmin'],
+        })
+        .then(function(user){
+            if (user){
+                return res.status(200).json(user); 
+            } else {
+                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
+            }
+        })
+        .catch(function(err){
+            res.status(500).json({message: err});
+        });
+    } else {
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à effectuer cette action.`})
+    }
 };
 
 // Read user profile
 exports.getUserProfile = (req, res, next) => {
-    // Getting auth header
-    var headerAuth  = req.headers['authorization'];
-    var userId      = jwtUtils.getUserId(headerAuth);
+    // Params
+    var tokenUserId     = req.auth.userId;
+    var tokenIsAdmin    = req.auth.isAdmin;
+    var paramId         = req.params.id;
 
-    if (userId < 0)
-        return res.status(400).json({'error': 'wrong token'});
-
-    User.findOne({
-        attributes: ['id', 'email', 'username', 'bio'],
-        where: {id: req.params.id}
-    })
-    .then(function(user){
-        if (user){
-            User.findOne({
-                where: {id: userId}
-            })
-            .then(function(userFound){
-                if (user.id === userId || userFound.isAdmin === true) {
-                    res.status(201).json(user);
-                } else {
-                    res.status(403).json({'error': 'You cannot access this profile'});
-                }
-            })
-            .catch(function(err){
-                return res.status(500).json({ 'error': 'unable to verify user' });
-            })
-            
-        } else {
-            res.status(404).json({'error': 'user not found'})
-        }
-    })
-    .catch(function(err){
-        res.status(500).json({'error': 'cannot fetch user'});
-    });
+    if (tokenUserId == paramId || tokenIsAdmin == true){
+        User.findOne({
+            attributes: ['id', 'email', 'username', 'bio'],
+            where: {id: paramId}
+        })
+        .then(function(user){
+            if (user){
+                return res.status(201).json(user); 
+            } else {
+                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
+            }
+        })
+        .catch(function(err){
+            res.status(500).json({message: err});
+        });
+    } else {
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à accéder à ce profil`})
+    }
 };
 
 // Update user profile
 exports.updateUserProfile = (req, res, next) => {
-    // Getting auth header
-    var headerAuth  = req.headers['authorization'];
-    var userId      = jwtUtils.getUserId(headerAuth);
-
     // Params
-    var bio = req.body.bio;
-    var email = req.body.email;
-    var password = req.body.password;
-    var isAdmin = req.body.isAdmin;
+    var tokenUserId     = req.auth.userId;
+    var tokenIsAdmin    = req.auth.isAdmin;
+    var paramId         = req.params.id;
+    var bio             = req.body.bio;
+    var email           = req.body.email;
+    var password        = req.body.password;
 
-    User.findOne({
-        attributes: ['id', 'email', 'password', 'bio'],
-        where: {id: req.params.id}
-    })
-    .then(function (userFound){
-        if (userFound){
-            if (userFound.id === userId || isAdmin === true) {
+    if (tokenUserId == paramId || tokenIsAdmin == true){
+        User.findOne({
+            attributes: ['id', 'email', 'password', 'bio'],
+            where: {id: paramId}
+        })
+        .then(function(user){
+            if (user){
                 if (email) {
                     if (emailValidator.validate(email)) {
-                        userFound.update({
-                            email: (email ? email : userFound.email)
+                        user.update({
+                            email: (email ? email : user.email)
                         })
                     } else {
                         return res.status(401).json({message : `L'adresse e-mail saisie est invalide. Veuillez entrer une adresse e-mail valide.`}); 
@@ -299,47 +265,45 @@ exports.updateUserProfile = (req, res, next) => {
                 } else if (password) {
                     if (schemaPassword.validate(password)) {
                         bcrypt.hash(password, 5, function(err, bcryptedPassword) {
-                            userFound.update({
-                                password: (password ? bcryptedPassword : userFound.password)
+                            user.update({
+                                password: (password ? bcryptedPassword : user.password)
                             })
                         })
                     } else {
                         return res.status(401).json({message : `Le mot de passe doit contenir au moins 8 caractères et être composé d'au moins 1 majuscule, 1 minuscule et 1 chiffre.`}); 
                     }
-                } else {
-                    userFound.update({
-                        bio: (bio ? bio : userFound.bio),
+                } else if (bio) {
+                    user.update({
+                        bio: (bio ? bio : user.bio),
                     })
                 }
-                return res.status(201).json({'message': 'Profile has been updated', userFound});
+                return res.status(201).json({message: `Le profil a été mis à jour avec succès`, user});
             } else {
-                return res.status(403).json({'error': 'You cannot access this profile'}); 
+                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
             }
-        } else {
-            return res.status(404).json({'error' : 'user not found'});
-        }
-    })
-    .catch(function(err){
-        return res.status(500).json({ 'error': 'unable to verify user' });
-    })
+        })
+        .catch(function(err){
+            res.status(500).json({message: err});
+        });
+    } else {
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à modifier ce profil`})
+    }
 };
 
 exports.updateUsername = (req, res, next) => {
-    // Getting auth header
-    var headerAuth  = req.headers['authorization'];
-    var userId      = jwtUtils.getUserId(headerAuth);
-
     // Params
-    var username    = req.body.username;
-    var isAdmin = req.body.isAdmin;
-    
-    User.findOne({
-        attributes: ['id', 'username'],
-        where: {id: req.params.id}
-    })
-    .then(function (user){
-        if (user){
-            if (user.id === userId || isAdmin === true) {
+    var tokenUserId     = req.auth.userId;
+    var tokenIsAdmin    = req.auth.isAdmin;
+    var paramId         = req.params.id;
+    var username        = req.body.username;
+
+    if (tokenUserId == paramId || tokenIsAdmin == true){
+        User.findOne({
+            attributes: ['id', 'username'],
+            where: {id: paramId}
+        })
+        .then(function(user){
+            if (user){
                 User.findOne({
                     where: {username: username}
                 })
@@ -348,57 +312,50 @@ exports.updateUsername = (req, res, next) => {
                         user.update({
                             username: (username ? username : user.username ),
                         })
-                        return res.status(201).json({'message': 'Profile has been updated', user});
+                        return res.status(201).json({message: 'Profile has been updated', user});
                     } else {
-                        return res.status(500).json({'error': `Le pseudo choisi existe déjà. Merci d'en choisir un autre.`});
+                        return res.status(500).json({message: `Le pseudo choisi existe déjà. Merci d'en choisir un autre.`});
                     }
                 })
                 .catch(function(err){
-                    return res.status(500).json({'error': 'unable to verify user'});
+                    return res.status(500).json({message: err});
                 });
             } else {
-                return res.status(403).json({'error': 'You cannot access this profile'});
+                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
             }
-        } else {
-            return res.status(404).json({'error' : 'user not found'});
-        }
-    })
-    .catch(function(err){
-        return res.status(500).json({ 'error': 'unable to verify user' });
-    })
+        })
+        .catch(function(err){
+            res.status(500).json({message: err});
+        });
+    } else {
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à accéder à ce profil`})
+    }
 };
 
 
 // Delete User profile
 exports.deleteUserProfile = (req, res, next) => {
-    // Getting auth header
-    var headerAuth  = req.headers['authorization'];
-    var userId      = jwtUtils.getUserId(headerAuth);
+    // Params
+    var tokenUserId     = req.auth.userId;
+    var tokenIsAdmin    = req.auth.isAdmin;
+    var paramId         = req.params.id;
 
-    User.findOne({
-        where: {id: req.params.id}
-    })
-    .then(function (userFound){
-        if (userFound){
-            User.findOne({
-                where: {id: userId}
-            })
-            .then(function(userRight){
-                if (userFound.id === userId || userRight.isAdmin === true) {
-                    userFound.destroy()
-                    return res.status(200).json({'message': `Your account has been deleted`});
-                } else {
-                    return res.status(403).json({'error': 'You cannot access this profile'});
-                }
-            })
-            .catch(function(err){
-                return res.status(500).json({ 'error': 'unable to verify user' });
-            })
-        } else {
-            return res.status(404).json({'error' : 'user not found'});
-        }
-    })
-    .catch(function(err){
-        return res.status(500).json({ 'error': 'unable to verify user' });
-    })
+    if (tokenUserId == paramId || tokenIsAdmin == true){
+        User.findOne({
+            where: {id: paramId}
+        })
+        .then(function(user){
+            if (user){
+                user.destroy()
+                return res.status(200).json({message: `Le compte a été supprimé avec succès.`})
+            } else {
+                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
+            }
+        })
+        .catch(function(err){
+            res.status(500).json({message: err});
+        });
+    } else {
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à accéder à ce profil`})
+    }
 };

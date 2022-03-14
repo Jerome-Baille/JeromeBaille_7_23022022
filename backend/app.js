@@ -1,7 +1,9 @@
 // Imports
-var express      = require('express');
-const path = require('path');
-var bodyParser  = require('body-parser');
+const express       = require('express');
+const path          = require('path');
+const bodyParser    = require('body-parser');
+const cookieParser  = require('cookie-parser');
+
 
 // Routes
 const userRoutes = require('./routes/user');
@@ -11,6 +13,8 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use(cookieParser());
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
