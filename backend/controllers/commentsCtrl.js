@@ -1,103 +1,108 @@
 // Imports
-var models = require('../models');
-var jwtUtils = require('../utils/jwt.utils');
+
+// Models
+const { Post, User, Comment } = require('../models');
 
 // Create a Comment
 exports.createComment = (req, res, next) => {
-      // Getting auth header
-      var headerAuth  = req.headers['authorization'];
-      var userId      = jwtUtils.getUserId(headerAuth);
+    // Params
+    var tokenUserId     = req.auth.userId;
+    var paramId         = req.params.id;
+    var content         = req.body.content;
 
-        //Paramètres
-        var content = req.body.content;
+    if (content == null || content.length <= 1) {
+      return res.status(400).json({message: `Veuillez renseigner un message d'une longueur d'au minimum 2 caractères.`})
+    }
 
-        if (content == null) {
-            return res.status(400).json({ 'error' : 'missing parameters'});
-        }
-
-        models.User.findOne({
-            where: {id: userId}
-        })
-        .then(function(userFound) {
-            if (userFound) {
-                models.Comment.create({
-                    content: content,
-                    userId: userFound.id,
-                    postId: req.params.id
-                })
-                .then(function(newComment){
-                    if (newComment) {
-                        return res.status(201).json(newComment);
-                      } else {
-                        return res.status(500).json({ 'error': 'cannot create a post' });
-                      }
-                })
-                .catch(function(err) {
-                    return res.status(500).json({ 'error': 'unable to verify user' });
-                })
+    if (tokenUserId){
+      Comment.create({
+          content: content,
+          userId: tokenUserId,
+          postId: paramId
+      })
+      .then(function(newComment){
+          if (newComment) {
+              return res.status(201).json(newComment);
             } else {
-                return res.status(404).json({'error' : 'user not found'});
+              return res.status(500).json({ message: `Impossible de créer un nouveau commentaire.` });
             }
-        })
-        .catch(function(err){
-            return res.status(500).json({ 'error': 'unable to verify user' });
-        })
+      })
+      .catch(function(err) {
+          return res.status(500).json({ message: err });
+      })
+    } else {
+      return res.status(403).json({message: `Vous n'êtes pas autorisé à effectuer cette action.`})
+    }
 };
 
-// Read one or all posts
+// Read one or all comments
 exports.getOneComment = (req, res, next) => {
-  models.Comment.findOne({
-    where : { id: req.params.commentId },
-  }).then((comment) => {
-    if (comment) {
-      res.status(200).json(comment);
-    } else {
-      res.status(404).json({ "error": "no comments found" });
-    }
-  }).catch(function(err) {
-    console.log(err);
-    res.status(500).json({ "error": err });
-  });
+  // Params
+  var tokenUserId     = req.auth.userId;
+  var paramComId      = req.params.commentId;
+
+  if (tokenUserId){
+    Comment.findOne({
+      where : { id: paramComId },
+      include : [{model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}]
+    }).then((comment) => {
+      if (comment) {
+        res.status(200).json(comment);
+      } else {
+        res.status(404).json({ message : `Aucun commentaire n'a été trouvé.` });
+      }
+    }).catch(function(err) {
+      res.status(500).json({ message: err });
+    });
+  } else {
+    return res.status(403).json({message: `Vous n'êtes pas autorisé à effectuer cette action.`})
+  }
 };
 
 exports.getAllComments = (req, res, next) => {
-        var fields = req.query.fields;
-        var limit = parseInt(req.query.limit);
-        var offset = parseInt(req.query.offset);
-        var order = req.query.order;
-        
-        models.Comment.findAll ({
-            order: [(order != null) ? order.split(':') : ['createdAt', 'DESC']],
-            attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
-            limit: (!isNaN(limit)) ? limit : null,
-            offset: (!isNaN(offset)) ? offset : null,
-        })
-        .then(function(comments) {
-            if (comments) {
-                res.status(200).json(comments);
-            } else {
-                res.status(404).json({ "error": "no posts found" });
-            }
-        })
-        .catch(function(err) {
-            console.log(err);
-            res.status(500).json({ "error": "invalid fields" });
-          });
+    // Params
+    var tokenUserId     = req.auth.userId;
+    var fields          = req.query.fields;
+    var limit           = parseInt(req.query.limit);
+    var offset          = parseInt(req.query.offset);
+    var order           = req.query.order;
+    
+    if (tokenUserId){
+      Comment.findAll ({
+        order: [(order != null) ? order.split(':') : ['createdAt', 'ASC']],
+        attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
+        limit: (!isNaN(limit)) ? limit : null,
+        offset: (!isNaN(offset)) ? offset : null,
+        include : [{model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}]
+    })
+    .then(function(comments) {
+        if (comments) {
+            res.status(200).json(comments);
+        } else {
+            res.status(404).json({ message : `Aucun commentaire n'a été trouvé.` });
+        }
+    })
+    .catch(function(err) {
+        console.log(err);
+        res.status(500).json({ message: err});
+      });
+    } else {
+      return res.status(403).json({message: `Vous n'êtes pas autorisé à effectuer cette action.`})
+    }
 }
 
 // Update a Comment
 exports.updateComment = (req, res, next) => {
-  // Getting auth header
-  var headerAuth  = req.headers['authorization'];
-  var userId      = jwtUtils.getUserId(headerAuth);
-  var isAdmin = req.body.isAdmin;
+  // Params
+  var tokenUserId     = req.auth.userId;
+  var tokenIsAdmin    = req.auth.isAdmin;
+  var paramComId      = req.params.commentId;
 
-  models.Comment.findOne({
-    where: {id: req.params.commentId}
+  Comment.findOne({
+    where: { id: paramComId }
   })
-
   .then(function(commentFound){
-    if (isAdmin === 1 || commentFound.userId === userId){
+    if (commentFound.userId === tokenUserId || tokenIsAdmin == true){
       const commentObject = req.file
       ? {
           ...req.body.comment,
@@ -107,48 +112,40 @@ exports.updateComment = (req, res, next) => {
         }
       : { ...req.body };
 
-      models.Comment.update(
-        { ...commentObject, id: req.params.commentId },
-        { where: { id: req.params.commentId } }
+      Comment.update(
+        { ...commentObject, id: paramComId },
+        { where: { id: paramComId } }
       )
-        .then(() => res.status(200).json({ post: "Comment modifié !" }))
+        .then(() => res.status(200).json({ message: `Commentaire modifié avec succès.` }))
         .catch((error) => res.status(400).json({ error }));
     } else {
-      return res.status(403).json({error: `Vous n'êtes pas autorisé à modifier ce commentaire`})
+      return res.status(403).json({ message: `Vous n'êtes pas autorisé à modifier ce commentaire`})
     }
   })
   .catch(function(err) {
-    return res.status(500).json ({ error : `Impossible de vérifier l'utilisateur` + err })
+    return res.status(500).json ({ message: err })
   });
 };
 
 // Delete a Comment
 exports.deleteComments = (req, res, next) => {
-        // récupérer l'autorisation
-        var headerAuth  = req.headers['authorization'];
-        var userId      = jwtUtils.getUserId(headerAuth);
+  // Params
+  var tokenUserId     = req.auth.userId;
+  var tokenIsAdmin    = req.auth.isAdmin;
+  var paramComId      = req.params.commentId;
 
-        models.Comment.findOne({
-            where: {id: req.params.commentId}
-        }) 
-
-        .then(function(commentsFound){
-            if(commentsFound) {
-                var isAdmin = req.body.isAdmin;
-                if (isAdmin === 1 || commentsFound.userId === userId){
-                    
-                    commentsFound.destroy();
-
-                    return res.status(201).json({msg: 'commentaire supprimé'});
-                }else {
-                    return res.status(403).json({msg: 'vous n\'êtes pas autorisé à supprimer ce commentaire'})
-                }
-                
-            }else {
-                return res.status(403).json({ msg: 'ce commentaire n\'est pas dans notre base de donné' +err });
-            }
-        })
-        .catch(function(err) {
-            return res.status(500).json ({ msg : 'impossible de vérifier l\'utilisateur' + err})
-        });
+  Comment.findOne({
+      where: {id: paramComId}
+  }) 
+  .then(function(commentsFound){
+    if (commentsFound.userId === tokenUserId || tokenIsAdmin == true){            
+        commentsFound.destroy();
+        return res.status(201).json({ message: `Le commentaire a été supprimé avec succès.` });  
+    } else {
+      return res.status(403).json({ message: `Vous n'êtes pas autorisé à suprimer ce commentaire`})
+    }
+  })
+  .catch(function(err) {
+      return res.status(500).json ({ message: err})
+  });
 }

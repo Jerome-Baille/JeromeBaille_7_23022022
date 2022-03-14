@@ -1,10 +1,11 @@
 // Imports
-const jwt               = require('jsonwebtoken');
-var bcrypt              = require('bcrypt');
-const User              = require('../models').User;
+const jwt               = require('jsonwebtoken'); // Authentification system
+const bcrypt            = require('bcrypt'); // Encrypts the password sent to the database
 const passwordValidator = require('password-validator'); // A library to simplify the rules of password validation, by taking away all the repeated parts and by providing a readable and maintainable API to use
 const emailValidator    = require("email-validator"); // Makes sure that the email address is valid
 
+// Models
+const { User }          = require('../models');
 
 // Create a schema for the passwords
 var schemaPassword = new passwordValidator();
