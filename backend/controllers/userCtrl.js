@@ -107,7 +107,7 @@ exports.login = (req, res, next) => {
                 userId: userFound.id,
                 isAdmin: userFound.isAdmin
             },
-            "RANDOM_TOKEN_SECRET",
+            process.env.TOKEN,
             { expiresIn: '14d' }
             );
             return res

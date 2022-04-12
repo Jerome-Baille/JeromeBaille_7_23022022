@@ -4,6 +4,8 @@ const path          = require('path');
 const bodyParser    = require('body-parser');
 const cookieParser  = require('cookie-parser');
 
+require ("dotenv").config(); // Loads environment variables from .env file
+
 
 // Routes
 const userRoutes    = require('./routes/user');

@@ -35,7 +35,7 @@
                 </a> 
             </div>
         </div>
-        <div *ngIf="toggle == true" class="nav__list__elements">
+        <div *ngIf="toggle == true && isMobileLayout" class="nav__list__elements">
             <a *ngIf="isAuth" routerLink="wall" routerLinkActive="active">Accueil</a>
 
             <div class="nav__list__elements__isAuth" *ngIf="isAuth; else login">

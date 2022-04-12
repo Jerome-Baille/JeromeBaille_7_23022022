@@ -124,26 +124,31 @@ header {
         }
 
         &__elements {
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: space-between;
-          margin: 1rem auto 1rem 3.7rem;
+          display: none;
 
-          & a {
-            padding: 1rem;
-            width: 10rem;
-
-            &:hover {
-              background-color: #FFE0E0;
-              text-decoration: none;
-            }
-          }
-
-          &__isAuth {
+          @include mobile {
+            width: 100%;
             display: flex;
             flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin: 1rem auto 1rem 3.7rem;
+
+            & a {
+              padding: 1rem;
+              width: 10rem;
+              
+  
+              &:hover {
+                background-color: #FFE0E0;
+                text-decoration: none;
+              }
+            }
+  
+            &__isAuth {
+              display: flex;
+              flex-direction: column;
+            }
           }
         }
       } 

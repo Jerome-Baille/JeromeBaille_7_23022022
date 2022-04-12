@@ -11,6 +11,8 @@ import { AuthService } from '../services/auth.service';
 export class HeaderComponent implements OnInit {
   isAuth: any = [];
   toggle: boolean = false;
+  isMobileLayout: boolean = false;
+
   
   faBars = faBars;
 
@@ -32,6 +34,8 @@ export class HeaderComponent implements OnInit {
       next: (v) => this.isAuth = v,
       error: () => this.isAuth = null
     })
+
+    window.onresize = () => this.isMobileLayout = window.innerWidth <= 768;
   }
 
 
