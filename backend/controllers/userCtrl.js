@@ -455,35 +455,30 @@ exports.deleteProfilePicture = (req, res, next) => {
     }
 }
 
+// Get all the posts from one user
 exports.getUserPosts = (req, res, next) => {
     // Params
-    var tokenUserId     = req.auth.userId;
-    var tokenIsAdmin    = req.auth.isAdmin;
     var paramId         = req.params.id;
 
-    if (tokenUserId == paramId || tokenIsAdmin == true){
-        Post.findAll({
-            where: {userId: paramId},
-            order: [
-                ['createdAt', 'DESC']
-            ],
-            include: [
-                {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']},
-                {model: Comment, include: {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}},
-                {model: Like, include: [{model: User, attributes: ['id', 'username', 'isAdmin']}]}
-            ],
-        })
-        .then(function(posts){
-            if (posts){
-                return res.status(200).json(posts)
-            } else {
-                res.status(404).json({message: `Aucun post n'a été trouvé`})
-            }
-        })
-        .catch(function(err){
-            res.status(500).json({message: err});
-        });
-    } else {
-        return res.status(403).json({message: `Vous n'êtes pas autorisé à accéder à ce profil`})
-    }
+    Post.findAll({
+        where: {userId: paramId},
+        order: [
+            ['createdAt', 'DESC']
+        ],
+        include: [
+            {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']},
+            {model: Comment, include: {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}},
+            {model: Like, include: [{model: User, attributes: ['id', 'username', 'isAdmin']}]}
+        ],
+    })
+    .then(function(posts){
+        if (posts){
+            return res.status(200).json(posts)
+        } else {
+            res.status(404).json({message: `Aucun post n'a été trouvé`})
+        }
+    })
+    .catch(function(err){
+        res.status(500).json({message: err});
+    });
 }

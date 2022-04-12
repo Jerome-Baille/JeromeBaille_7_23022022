@@ -1,8 +1,6 @@
 @import"https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Shrikhand&display=swap";
 
 /* Utils */
-// @import "./utils/variables";
-// @import "./utils/animations";
 @import "utils/mixins";
 
 /* Base */
@@ -10,17 +8,14 @@
 @import "base/normalize";
 
 /* Pages */
-@import "pages/container";
-// @import "pages/post";
+@import "pages/admin-dashboard";
+@import "pages/post-list";
 
 /* Components */
 @import "./components/buttons";
-// @import "./components/cards";
 // @import "./components/loading-spinner";
 
 /* Layouts */
-
-// @import "./layouts/container";
-// @import "./layouts/footer";
-// @import "./layouts/form";
-// @import "./layouts/header";
+@import "./layouts/header";
+@import "./layouts/sidebar";
+@import "layouts/container";
