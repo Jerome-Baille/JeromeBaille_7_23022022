@@ -1,9 +1,54 @@
 <header>
-    <h1>Groupomania</h1>
-    <nav>
-        <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-        <a routerLink="facesnaps" routerLinkActive="active">Wall</a>
-        <a routerLink="register" routerLinkActive="active">Register</a>
-        <a routerLink="login" routerLinkActive="active">Login</a>
+    <nav class="nav">
+        <div class="nav__container">
+            <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+                <img src="../../assets/icon-left-font-1.svg" alt="Logo de Groupomania" class="logo--large">
+                <img src="../../assets/icon.svg" alt="Logo de Groupomania" class="logo--small">
+            </a>
+    
+            <input type="text" class="nav__search" placeholder="Search..">
+    
+            <button class="nav__list" (click)="onToggle()">
+                <fa-icon [icon]="faBars" class="nav__list--icon"></fa-icon>
+            </button>
+    
+            <div class="nav__icons-controllers">
+                <a *ngIf="isAuth" routerLink="wall" routerLinkActive="active">
+                    <img src="../../assets/home.png" alt="Home" class="nav-btn">
+                </a>
+    
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <img src="../../assets/user.png" alt="" class="nav-btn">
+                    </button>
+                    <div class="dropdown-content">
+                        <a *ngIf="isAuth" href="profil/{{isAuth.userId}}" routerLinkActive="active">Profil</a>
+                        <a routerLink="login" routerLinkActive="active" *ngIf="isAuth; else login">Se déconnecter</a>
+                            <ng-template #login>
+                                <a routerLink="register" routerLinkActive="active">S'enregistrer</a>
+                                <a routerLink="login" routerLinkActive="active">Se connecter</a>
+                            </ng-template>
+                    </div>
+                </div>    
+                <a routerLink="admin" routerLinkActive="active" *ngIf="isAuth.isAdmin">
+                    <img src="../../assets/crown.png" alt="admin access" class="nav-btn">
+                </a> 
+            </div>
+        </div>
+        <div *ngIf="toggle == true" class="nav__list__elements">
+            <a *ngIf="isAuth" routerLink="wall" routerLinkActive="active">Accueil</a>
+
+            <div class="nav__list__elements__isAuth" *ngIf="isAuth; else login">
+                <a href="profil/{{isAuth.userId}}" routerLinkActive="active">Profil</a>
+                <a routerLink="login" routerLinkActive="active" >Se déconnecter</a>
+            </div>
+
+            <ng-template #login>
+                <a routerLink="register" routerLinkActive="active">S'enregistrer</a>
+                <a routerLink="login" routerLinkActive="active">Se connecter</a>
+            </ng-template>
+
+            <a *ngIf="isAuth.isAdmin" routerLink="admin" routerLinkActive="active">Admin</a> 
+        </div>
     </nav>
   </header>

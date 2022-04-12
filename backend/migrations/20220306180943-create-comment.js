@@ -27,12 +27,22 @@ module.exports = {
         onDelete: 'CASCADE'
       },
       content: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING
       },
       attachment: {
         allowNull: true,
         type: Sequelize.STRING
+      },
+      isSignaled: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
+        default: false
+      },
+      points: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        default: 0,
       },
       createdAt: {
         allowNull: false,

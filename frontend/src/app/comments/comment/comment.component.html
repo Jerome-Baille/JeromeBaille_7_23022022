@@ -1,0 +1,57 @@
+<div class="container--comment">
+    <p>{{ c.content }}</p>
+    <img *ngIf="c.attachment" [src]="c.attachment" alt="">
+    <p>By {{ c.User.username }}</p>   
+    
+    <div class="container--comment__btn">
+        <div class="points__container">
+            <button [ngStyle]="(getComment.ComLikes && findRightUser(getComment.ComLikes) == 'like')? {'color':'green'} : {} " type="submit" (click)="onLikeComment()">
+                <fa-icon [icon]="faCircleUp"></fa-icon>
+            </button>
+            <span>
+                {{ c.points }}
+            </span>
+            <button [ngStyle]="(getComment.ComLikes && findRightUser(getComment.ComLikes) == 'dislike')? {'color':'darkred'} : {} " type="submit" (click)="onDislikeComment()">
+                <fa-icon [icon]="faCircleDown"></fa-icon>
+            </button>
+        </div>
+
+        <div>
+            <button class="btn-noBg" *ngIf="isAuth.userId == c.User.id || isAuth.isAdmin" (click)="loadChildComponent()">
+                <div>
+                    <fa-icon [icon]="faPenToSquare"></fa-icon>
+                    <p>Editer</p>
+                </div>
+            </button>
+            
+        
+            <button class="btn-noBg"  *ngIf="isAuth.userId == c.User.id || isAuth.isAdmin" (click)="onDeleteComment()">
+                <div>
+                    <fa-icon [icon]="faTrash"></fa-icon>
+                    <p>Supprimer</p>
+                </div>
+            </button>
+    
+       
+            <button class="btn-noBg" *ngIf="c.isSignaled && isAuth.isAdmin; else report" (click)="onUnreportComment()">
+                <div>
+                    <fa-icon [icon]="faThumbsUp"></fa-icon>
+                    <p>Valider</p>
+                </div>
+            </button>
+            <ng-template #report>
+                <button class="btn-noBg" (click)="onReportComment()">
+                    <div>
+                        <fa-icon [icon]="faCircleExclamation"></fa-icon>
+                        <p>Signaler</p>
+                    </div>
+                </button>
+            </ng-template>
+            
+        </div>
+    </div>
+
+    <app-update-a-comment *ngIf="loadComponent" [c]="c"></app-update-a-comment>
+
+</div>
+<p *ngIf="errorMsg">{{ errorMsg }}</p>

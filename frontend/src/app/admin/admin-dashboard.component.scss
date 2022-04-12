@@ -1,0 +1,98 @@
+@import "../../sass/utils/mixins";
+
+.dashboard-container {
+  margin: auto 2rem;
+
+  @include desktop {
+    margin: auto;
+  }
+
+  @include large {
+    margin: auto;
+  }
+
+  &__card {
+    border: 2px solid rgba(0, 0, 0, 0.25);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+    margin: 2rem auto;
+    background: #FFFFFF;
+    border-radius: 8px;
+    max-width: 900px;
+
+    h2 {
+      text-align: center;
+    }
+
+    &:first-child {
+      border: 2px solid rgba(255, 0, 0, 0.38);
+    }
+
+    &:not(:first-child):hover{
+      box-shadow: 0 4px 12px 0 rgba(112, 112, 112, 0.9); 
+    }
+
+    .selected-user {
+      margin-top: 1rem;
+    }
+
+    &__empty {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    &__form{
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 80%;
+      margin: auto;
+    }
+
+    // Accordion
+    input {
+      position: absolute;
+      opacity: 0;
+      z-index: -1;
+    }
+    // Layout
+    .row {
+      display:flex;
+      .col {
+        flex:1;
+        &:last-child {
+          margin-left: 1em;
+        }
+      }
+    }
+
+    /* Accordion styles */
+    .tab {
+      width: 100%;
+      overflow: hidden;
+      &-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      &-content {
+        margin: auto;
+        max-height: 0;
+        padding: 0 1em;
+        transition: all .35s;
+      }
+    }
+
+    // :checked
+    input:checked {
+      ~ .tab-content {
+        max-height: fit-content;
+        padding: 1em;
+      }
+    }
+  }
+}

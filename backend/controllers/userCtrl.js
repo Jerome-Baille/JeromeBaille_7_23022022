@@ -3,9 +3,10 @@ const jwt               = require('jsonwebtoken'); // Authentification system
 const bcrypt            = require('bcrypt'); // Encrypts the password sent to the database
 const passwordValidator = require('password-validator'); // A library to simplify the rules of password validation, by taking away all the repeated parts and by providing a readable and maintainable API to use
 const emailValidator    = require("email-validator"); // Makes sure that the email address is valid
+const fs                = require('fs');
 
 // Models
-const { User }          = require('../models');
+const { User, Post, Comment, Like }          = require('../models');
 
 // Create a schema for the passwords
 var schemaPassword = new passwordValidator();
@@ -40,11 +41,13 @@ exports.register = (req, res, next) => {
                     .then(function(userFound) {
                         if (!userFound) {
                             bcrypt.hash(password, 5, function(err, bcryptedPassword) {
-                                var newUser = User.create({
+
+                                User.create({
                                     email       : email,
                                     username    : username,
                                     password    : bcryptedPassword,
                                     bio         : bio,
+                                    avatar      : null,
                                     isAdmin     : 0
                                 })
                                 .then(function(newUser){
@@ -105,7 +108,7 @@ exports.login = (req, res, next) => {
                 isAdmin: userFound.isAdmin
             },
             "RANDOM_TOKEN_SECRET",
-            { expiresIn: '1h' }
+            { expiresIn: '14d' }
             );
             return res
                 .cookie('jwt', token /*, {httpOnly: true}*/)
@@ -113,6 +116,7 @@ exports.login = (req, res, next) => {
                 .json({
                     message: 'Vous êtes connecté',
                     'userId': userFound.id,
+                    'isAdmin': userFound.isAdmin,
                     'token': token
                 })
         })
@@ -135,16 +139,19 @@ exports.logout = (req, res, next) => {
 exports.grantAdmin = (req, res, next) => {
     // Params
     var tokenIsAdmin    = req.auth.isAdmin;
-    var paramId         = req.params.id;
+    var userId          = req.params.id;
+    var isAdmin         = req.body.isAdmin;
 
     if (tokenIsAdmin == true){
         User.findOne({
-            where: {id: paramId}
+            attributes: ['id', 'isAdmin'],
+            where: {id: userId}
         })
         .then(function(user){
             if (user){
                 user.update({
-                    isAdmin: true,
+                    isAdmin: (isAdmin ? isAdmin : user.isAdmin)
+                    // isAdmin: true,
                 })
                 return res.status(200).json({message: `L'utilisateur dispose à présent des droits administrateurs.`})
             } else {
@@ -163,16 +170,18 @@ exports.grantAdmin = (req, res, next) => {
 exports.revokeAdmin = (req, res, next) => {
     // Params
     var tokenIsAdmin    = req.auth.isAdmin;
-    var paramId         = req.params.id;
+    var userId          = req.params.id;
+    var isAdmin         = req.body.isAdmin;
 
     if (tokenIsAdmin == true){
         User.findOne({
-            where: {id: paramId}
+            attributes: ['id', 'isAdmin'],
+            where: {id: userId}
         })
         .then(function(user){
             if (user){
                 user.update({
-                    isAdmin: false,
+                    isAdmin: (!isAdmin ? isAdmin : user.isAdmin)
                 })
                 return res.status(200).json({message: `Les droits administrateurs ont été retiré à l'utilisateur.`})
             } else {
@@ -214,38 +223,113 @@ exports.getAllUsers = (req, res, next) => {
 // Read user profile
 exports.getUserProfile = (req, res, next) => {
     // Params
+    var paramId         = req.params.id;
+
+    User.findOne({
+        attributes: ['id', 'email', 'username', 'bio', 'avatar', 'isAdmin', 'createdAt'],
+        where: {id: paramId}
+    })
+    .then(function(user){
+        if (user){
+            return res.status(201).json(user); 
+        } else {
+            res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
+        }
+    })
+    .catch(function(err){
+        res.status(500).json({message: err});
+    });
+};
+
+// Update user profile (bio, email, avatar)
+exports.updateUserProfile = (req, res, next) => {
     var tokenUserId     = req.auth.userId;
     var tokenIsAdmin    = req.auth.isAdmin;
     var paramId         = req.params.id;
+    var username        = req.body.username;
+    var email           = req.body.email;
+
+
+    // Validators 
+    if (email && !emailValidator.validate(email)){
+        return res.status(400).json({message: `L'adresse email est invalide`});
+    } 
 
     if (tokenUserId == paramId || tokenIsAdmin == true){
         User.findOne({
-            attributes: ['id', 'email', 'username', 'bio'],
             where: {id: paramId}
-        })
-        .then(function(user){
-            if (user){
-                return res.status(201).json(user); 
-            } else {
-                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
-            }
-        })
-        .catch(function(err){
-            res.status(500).json({message: err});
-        });
+            })
+            .then(function(userFound){
+                if (req.file){
+                    if(userFound.avatar != null){
+                        const image = userFound.avatar.split("/images/")[1];
+                        fs.unlink(`images/${image}`, () => {
+                            const userObject = {
+                                ...req.body,
+                                avatar: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+                            }
+                            User.update(
+                                { ...userObject },
+                                { where: { id: paramId} }
+                            )
+                                .then(() => res.status(200).json({ message : `L'utilisateur a été modifié avec succès !` }))
+                                .catch((err) => {
+                                    if (err.errors[0].validatorKey == `not_unique`){
+                                        return res.status(500).json({ message: `Le pseudo choisi existe déjà. Merci d'en choisir un autre.` });
+                                    } else {
+                                        return res.status(400).json({ message: `Une erreur s'est produite, veuillez rééssayer ultérieurement.` });
+                                    }
+                                })
+                        });
+                    } else {
+                        const userObject = {
+                            ...req.body,
+                            avatar: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+                        }
+                        User.update(
+                            { ...userObject },
+                            { where: { id: paramId} }
+                        )
+                            .then(() => res.status(200).json({ message : `L'utilisateur a été modifié avec succès !` }))
+                            .catch((err) => {
+                                if (err.errors[0].validatorKey == `not_unique`){
+                                    return res.status(500).json({ message: `Le pseudo choisi existe déjà. Merci d'en choisir un autre.` });
+                                } else {
+                                    return res.status(400).json({ message: `Une erreur s'est produite, veuillez rééssayer ultérieurement.` });
+                                }
+                            })
+                    } 
+                } else {
+                    const userObject = {
+                        ...req.body,
+                    }
+                    User.update(
+                        { ...userObject },
+                        { where: { id: paramId} }
+                    )
+                        .then(() => res.status(200).json({ message : `L'utilisateur a été modifié avec succès !` }))
+                        .catch((err) => {
+                            if (err.errors[0].validatorKey == `not_unique`){
+                                return res.status(500).json({ message: `Le pseudo choisi existe déjà. Merci d'en choisir un autre.` });
+                            } else {
+                                return res.status(400).json({ message: `Une erreur s'est produite, veuillez rééssayer ultérieurement.` });
+                            }
+                        })    
+                }                    
+            })
+            .catch(function(err) {
+            return res.status(500).json ({ message : `Une erreur s'est produite, veuillez rééssayer ultérieurement.` })
+            });
     } else {
-        return res.status(403).json({message: `Vous n'êtes pas autorisé à accéder à ce profil`})
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à effectuer cette action.`})
     }
+
 };
 
-// Update user profile
-exports.updateUserProfile = (req, res, next) => {
-    // Params
+exports.updatePassword = (req, res, next) => {
     var tokenUserId     = req.auth.userId;
     var tokenIsAdmin    = req.auth.isAdmin;
     var paramId         = req.params.id;
-    var bio             = req.body.bio;
-    var email           = req.body.email;
     var password        = req.body.password;
 
     if (tokenUserId == paramId || tokenIsAdmin == true){
@@ -255,30 +339,16 @@ exports.updateUserProfile = (req, res, next) => {
         })
         .then(function(user){
             if (user){
-                if (email) {
-                    if (emailValidator.validate(email)) {
+                if (schemaPassword.validate(password)) {
+                    bcrypt.hash(password, 5, function(err, bcryptedPassword) {
                         user.update({
-                            email: (email ? email : user.email)
+                            password: (password ? bcryptedPassword : user.password)
                         })
-                    } else {
-                        return res.status(401).json({message : `L'adresse e-mail saisie est invalide. Veuillez entrer une adresse e-mail valide.`}); 
-                    }
-                } else if (password) {
-                    if (schemaPassword.validate(password)) {
-                        bcrypt.hash(password, 5, function(err, bcryptedPassword) {
-                            user.update({
-                                password: (password ? bcryptedPassword : user.password)
-                            })
-                        })
-                    } else {
-                        return res.status(401).json({message : `Le mot de passe doit contenir au moins 8 caractères et être composé d'au moins 1 majuscule, 1 minuscule et 1 chiffre.`}); 
-                    }
-                } else if (bio) {
-                    user.update({
-                        bio: (bio ? bio : user.bio),
                     })
+                    return res.status(201).json({message: `Le mot de passe a été mis à jour avec succès`, user});
+                } else {
+                    return res.status(401).json({message : `Le mot de passe doit contenir au moins 8 caractères et être composé d'au moins 1 majuscule, 1 minuscule et 1 chiffre.`});
                 }
-                return res.status(201).json({message: `Le profil a été mis à jour avec succès`, user});
             } else {
                 res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
             }
@@ -288,48 +358,6 @@ exports.updateUserProfile = (req, res, next) => {
         });
     } else {
         return res.status(403).json({message: `Vous n'êtes pas autorisé à modifier ce profil`})
-    }
-};
-
-exports.updateUsername = (req, res, next) => {
-    // Params
-    var tokenUserId     = req.auth.userId;
-    var tokenIsAdmin    = req.auth.isAdmin;
-    var paramId         = req.params.id;
-    var username        = req.body.username;
-
-    if (tokenUserId == paramId || tokenIsAdmin == true){
-        User.findOne({
-            attributes: ['id', 'username'],
-            where: {id: paramId}
-        })
-        .then(function(user){
-            if (user){
-                User.findOne({
-                    where: {username: username}
-                })
-                .then(function(userAlreadyExists){
-                    if (!userAlreadyExists) {
-                        user.update({
-                            username: (username ? username : user.username ),
-                        })
-                        return res.status(201).json({message: 'Profile has been updated', user});
-                    } else {
-                        return res.status(500).json({message: `Le pseudo choisi existe déjà. Merci d'en choisir un autre.`});
-                    }
-                })
-                .catch(function(err){
-                    return res.status(500).json({message: err});
-                });
-            } else {
-                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
-            }
-        })
-        .catch(function(err){
-            res.status(500).json({message: err});
-        });
-    } else {
-        return res.status(403).json({message: `Vous n'êtes pas autorisé à accéder à ce profil`})
     }
 };
 
@@ -347,8 +375,22 @@ exports.deleteUserProfile = (req, res, next) => {
         })
         .then(function(user){
             if (user){
-                user.destroy()
-                return res.status(200).json({message: `Le compte a été supprimé avec succès.`})
+                if(user.avatar){
+                    const filename = user.avatar.split('/images/')[1];
+                    fs.unlink(`images/${filename}`, () => {
+                        user.destroy()
+                        return res
+                            .clearCookie("jwt", {domain: 'localhost', path: '/'})
+                            .status(200)
+                            .json({message: `Le compte a été supprimé avec succès.`})
+                    })
+                } else {
+                    user.destroy()
+                    return res
+                        .clearCookie("jwt", {domain: 'localhost', path: '/'})
+                        .status(200)
+                        .json({message: `Le compte a été supprimé avec succès.`})
+                }
             } else {
                 res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
             }
@@ -360,3 +402,88 @@ exports.deleteUserProfile = (req, res, next) => {
         return res.status(403).json({message: `Vous n'êtes pas autorisé à accéder à ce profil`})
     }
 };
+
+
+// Check if the user is authenticated
+exports.isAuth = (req,res, next) => {
+    // Params
+    var tokenUserId     = req.auth.userId;
+    var tokenIsAdmin    = req.auth.isAdmin;
+
+    if (tokenUserId) {
+        var isAuth = {
+            userId: tokenUserId,
+            isAdmin: tokenIsAdmin
+        }
+        return res.status(200).json(isAuth)
+    } 
+};
+
+// Delete profile picture
+exports.deleteProfilePicture = (req, res, next) => {
+    // Params
+    var tokenUserId     = req.auth.userId;
+    var tokenIsAdmin    = req.auth.isAdmin;
+    var paramId         = req.params.id;
+
+    if (tokenUserId == paramId || tokenIsAdmin == true){
+        User.findOne({
+            where: {id: paramId}
+        })
+        .then(function(user){
+            if (user){
+                if(user.avatar){
+                    const filename = user.avatar.split('/images/')[1];
+                    fs.unlink(`images/${filename}`, () => {
+                        user.update({
+                            avatar: null
+                        })
+                        return res.status(200).json({message: `L'image a été supprimée avec succès.`})
+                    })
+                } else {
+                    return res.status(200).json({message: `Aucune image n'a été trouvée.`})
+                }
+            } else {
+                res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})
+            }
+        })
+        .catch(function(err){
+            res.status(500).json({message: err});
+        });
+    } else {
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à accéder à ce profil`})
+    }
+}
+
+exports.getUserPosts = (req, res, next) => {
+    // Params
+    var tokenUserId     = req.auth.userId;
+    var tokenIsAdmin    = req.auth.isAdmin;
+    var paramId         = req.params.id;
+
+    if (tokenUserId == paramId || tokenIsAdmin == true){
+        Post.findAll({
+            where: {userId: paramId},
+            order: [
+                ['createdAt', 'DESC']
+            ],
+            include: [
+                {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']},
+                {model: Comment, include: {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}},
+                {model: Like, include: [{model: User, attributes: ['id', 'username', 'isAdmin']}]}
+            ],
+        })
+        .then(function(posts){
+            if (posts){
+                return res.status(200).json(posts)
+            } else {
+                res.status(404).json({message: `Aucun post n'a été trouvé`})
+            }
+        })
+        .catch(function(err){
+            res.status(500).json({message: err});
+        });
+    } else {
+        return res.status(403).json({message: `Vous n'êtes pas autorisé à accéder à ce profil`})
+    }
+}

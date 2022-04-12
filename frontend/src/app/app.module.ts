@@ -2,35 +2,57 @@ import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import { BlogComponent } from './blog/blog.component';
+import { PostComponent } from './wall/post/post.component';
 import { registerLocaleData } from '@angular/common';
 import * as fr from '@angular/common/locales/fr';
-import { BlogListComponent } from './blog-list/blog-list.component';
+import { PostListComponent } from './wall/post-list/post-list.component';
 import { HeaderComponent } from './header/header.component';
 import { AppRoutingModule } from './app-routing.module';
 import { LandingPageComponent } from './landing-page/landing-page.component';
-import { SingleFaceSnapComponent } from './single-face-snap/single-face-snap.component';
+import { SinglePostComponent } from './wall/single-post/single-post.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { LoginComponent } from './auth/login/login.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { ProfileComponent } from './profile/profile.component';
+import { ProfileUpdateComponent } from './profile-update/profile-update.component';
+import { CreateAPostComponent } from './wall/create-a-post/create-a-post.component';
+import { UpdateAPostComponent } from './wall/update-a-post/update-a-post.component';
+import { CreateACommentComponent } from './comments/create-a-comment/create-a-comment.component';
+import { CommentsListComponent } from './comments/comments-list/comments-list.component';
+import { CommentComponent } from './comments/comment/comment.component';
+import { UpdateACommentComponent } from './comments/update-a-comment/update-a-comment.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { AdminDashboardComponent } from './admin/admin-dashboard.component';
+import { MostPopularComponent } from './wall/most-popular/most-popular.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    BlogComponent,
-    BlogListComponent,
+    PostComponent,
+    PostListComponent,
     HeaderComponent,
     LandingPageComponent,
-    SingleFaceSnapComponent,
+    SinglePostComponent,
     RegisterComponent,
-    LoginComponent
+    LoginComponent,
+    ProfileComponent,
+    ProfileUpdateComponent,
+    CreateAPostComponent,
+    UpdateAPostComponent,
+    CreateACommentComponent,
+    CommentsListComponent,
+    CommentComponent,
+    UpdateACommentComponent,
+    AdminDashboardComponent,
+    MostPopularComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    HttpClientModule
+    HttpClientModule,
+    FontAwesomeModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR'}

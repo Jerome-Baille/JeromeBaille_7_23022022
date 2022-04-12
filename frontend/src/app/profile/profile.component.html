@@ -1,0 +1,142 @@
+<div *ngIf="isAuth; else denied">
+    <div *ngIf="displayProfile!= null; else inexistant" class="card container container--single">
+        <main class="main">
+            <header class="main__header main__header--center">
+                <h2>
+                    Profil de 
+                    <span class="main__header__user-link">{{ displayProfile.username }}</span>
+                </h2>
+            </header>
+    
+            <section class="main__content">
+                <div class="main__content__container main__content__container--row">    
+                    <div class="img__container">
+                        <img class="main__content__container__img main__content__container__img--limit" [src]="displayProfile.avatar!= null ? displayProfile.avatar : '../../assets/default-profile-picture.jpg'" alt="photo de profil">
+                    </div>
+
+                    <div class="main__content__container__text main__content__container__text--col-start">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        Nom d'utilisateur :
+                                    </td>
+                                    <td>
+                                        {{ displayProfile.username }}
+                                    </td>
+                                </tr>
+                                <tr *ngIf="displayProfile.id == isAuth.userId || isAuth.isAdmin">
+                                    <td>
+                                        E-mail :
+                                    </td>
+                                    <td>
+                                        {{ displayProfile.email }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Bio :
+                                    </td>
+                                    <td>
+                                        <span *ngIf="displayProfile.bio"> {{ displayProfile.bio }}</span>
+                                        <span *ngIf="!displayProfile.bio" class="empty-bio">Non renseigné</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Rôle :
+                                    </td>
+                                    <td>
+                                        {{ displayProfile.isAdmin ? 'Administrateur' : 'Utilisateur' }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Créé le :
+                                    </td>
+                                    <td>
+                                        {{ displayProfile.createdAt | date: 'dd/MM/yyyy' }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Nombre de posts :
+                                    </td>
+                                    <td>
+                                        {{ post.length }}
+                                      <button class="btn-chevron" *ngIf="(post.length!= 0)" (click)="loadChildComponent('loadPosts')">
+                                          <fa-icon *ngIf="loadPosts" [icon]="faChevronUp"></fa-icon>
+                                          <fa-icon *ngIf="!loadPosts" [icon]="faChevronDown"></fa-icon>
+                                      </button> 
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="main__content__check-container" *ngIf="displayProfile.id == isAuth.userId || isAuth.isAdmin">
+                <input type="checkbox" id="{{ displayProfile.id }}" class="checkbox"> 
+                <label for="{{ displayProfile.id }}" class="checkbox__label" [ngClass]="(isAuth.isAdmin) ? 'xl-fit' : 'm-fit'">
+                    <div class="checkbox__label__icons">
+                        <fa-icon [icon]="faChevronLeft" class="left-arrow"></fa-icon>
+                        <fa-icon [icon]="faChevronRight" class="right-arrow"></fa-icon>
+                    </div>
+                </label>
+
+                <div class="main__content__options">
+                    <button class="btn-noBg" *ngIf="isAuth.isAdmin && (displayProfile.isAdmin == false)" type="submit" (click)="onGrant()">
+                        <div class="btn-col">
+                            <fa-icon [icon]="faUserGraduate"></fa-icon>
+                            Promouvoir
+                        </div>
+                    </button>
+                    <button class="btn-noBg" *ngIf="isAuth.isAdmin && (displayProfile.isAdmin == true)" type="submit" (click)="onRevoke()">
+                        <div class="btn-col">
+                            <fa-icon [icon]="faUserSlash"></fa-icon>
+                            Destituer
+                        </div>
+                    </button>
+
+                    <button class="btn-noBg" (click)="loadChildComponent('editProfile')">
+                        <div class="btn-col">
+                            <fa-icon [icon]="faPenToSquare"></fa-icon>
+                            Editer
+                        </div>
+                    </button>
+
+                    <button class="btn-noBg" (click)="deleteProfile()">
+                        <div class="btn-col">
+                            <fa-icon [icon]="faTrash"></fa-icon>
+                            Supprimer
+                        </div>
+                    </button>
+                </div> 
+            </section> 
+                
+            <footer class="main__footer--profile">
+                <app-profile-update *ngIf="loadEditProfile" [displayProfile]="displayProfile"></app-profile-update>
+            
+                <div  *ngIf="loadPosts">
+                    <app-post *ngFor="let post of posts$ | async" [post]="post"></app-post>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+
+    <ng-template #inexistant>
+        <div class="card card--denied">
+            <h2>Le profil demandé n'existe pas</h2>
+        </div>
+    </ng-template>
+</div>
+
+
+<ng-template #denied>
+    <div class="card card--denied">
+        <h2>Veuillez vous connecter pour accéder à cette page</h2>
+        <button class="btn" (click)="onToLogin()">Se connecter</button>
+    </div>
+</ng-template>

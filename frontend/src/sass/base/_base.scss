@@ -1,0 +1,48 @@
+*{
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto';
+    background-color:  rgba(196, 196, 196, 0.5);
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.card {
+    background: #FFFFFF;
+    border-radius: 8px;
+    max-width: 900px;
+
+    &img {
+        width: 100%;
+    }
+
+    &h2 {
+    margin-bottom: 0;
+    }
+
+    &p {
+    font-weight: 300;
+    font-size: 1rem;
+    }
+
+    &--denied {
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-bottom: 2rem;
+    }
+}
+
+button {
+    cursor: pointer;
+}

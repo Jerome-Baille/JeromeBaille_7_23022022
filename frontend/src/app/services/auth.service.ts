@@ -1,56 +1,53 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, of } from 'rxjs';
-import { FaceSnap, User } from '../models/blog.model';
+import { map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  isAuth: any = [];
+  userId!: number;
 
   constructor(private http: HttpClient) {}
 
-  errorMessage = '';
+// Authentification
 
-  login(email: string, password: string){
-    return this.http.post('http://localhost:3000/api/users/login', {email, password}, {withCredentials: true});
-  }
-
-    // login(email: string, password: string) {
-  //   this.http.post('http://localhost:3000/api/users/login', {email, password})
-  //   .subscribe({
-  //     next : data => {
-  //       console.log(data)
-  //   },
-  //     error: err => {
-  //     console.log('Erreur : ' + err)
-  //   }
-  //   })
-  // }
-
-//   login(email: string, password: string) {
-//     return new Promise((resolve, reject) => {
-//       this.http.post('http://localhost:3000/api/users/login', {email, password}, { withCredentials: true, observe: 'response' })
-//     .pipe(catchError(err => {
-//       return of(err);
-//     }))
-//     .subscribe((response): void => {
-//       if (response.status === 200) {
-//         console.log(response)
-//       } else {
-//         const errorMsg = response.error.message
-//         console.log(errorMsg);
-//       }
-//   })
-// })
-//   }
-
-
+  // Register
   register(email: string, username: string, password: string){
     return this.http.post('http://localhost:3000/api/users/register', {email, username, password}, {withCredentials: true});
   }
 
+  // Login
+  login(email: string, password: string){
+    return this.http.post('http://localhost:3000/api/users/login', {email, password}, {withCredentials: true});
+  }
+
+  // Logout
   logout(){
     return this.http.get('http://localhost:3000/api/users/logout', {withCredentials: true});
+  }
+
+  // Check if the user is authenticated
+  checkIsAuth(){
+    return this.http.get('http://localhost:3000/api/users/isAuth', {withCredentials: true});
+    // if(this.isAuth.length == 0){
+    //   this.http.get(`http://localhost:3000/api/users/isAuth`, {withCredentials: true})
+    //     .subscribe({
+    //       next: (v) => {
+    //         this.isAuth = v
+    //         this.userId = this.isAuth.userId
+    //       },
+    //       error: () => this.isAuth = null,
+    //       complete: () => console.log('complete')
+    //     })
+    //   return this.isAuth;
+    // } else {
+    //   return this.isAuth;
+    // }
+  }
+
+  headerCheckIsAuth(){
+    return this.http.get('http://localhost:3000/api/users/isAuth', {withCredentials: true});
   }
 }

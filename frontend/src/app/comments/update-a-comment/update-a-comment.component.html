@@ -1,0 +1,28 @@
+<div class="card container">
+  <main class="main main--center">
+    <form [formGroup]="updateCommentForm">
+        <div class="form-group">
+            <label for="content">Message </label>
+            <textarea class="form-group__textarea form-group__textarea--big" id="content" type="text" formControlName="content" placeholder="{{c.content}}"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="attachment"></label>
+            <input id="attachment" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
+            <div class="form-group__img-manager">
+              {{fileUpload.value || 'Aucun fichier séléctionné'}}
+      
+              <button (click)="fileUpload.click()">
+                <fa-icon [icon]="faPaperclip"></fa-icon> 
+              </button>
+              <button *ngIf="c.attachment" type="submit" (click)="onDelPicture()">
+                <fa-icon [icon]="faTrashCan"></fa-icon>
+              </button>
+            </div>
+          </div>
+        <div class="form-group__buttons">
+            <button class="btn" type="submit" (click)="onUpdateComment()" [disabled]="updateCommentForm.invalid">Modifier</button>
+        </div>
+        <p class="form-group__alert-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+    </form>
+  </main>
+</div>

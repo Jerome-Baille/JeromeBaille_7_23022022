@@ -1,0 +1,128 @@
+.btn {
+    background: #FFE0E0;
+    border-radius: 8px;
+    min-height: 2rem;
+    width: 15rem;
+    box-shadow: 0 0 15px rgba(112, 112, 112, 0.1);
+
+    &--center{
+        margin: auto;
+    }
+
+    &:hover{
+        box-shadow: 0 4px 8px 0 rgba(112, 112, 112, 0.6); 
+    }
+}
+
+.btn--small {
+    background-color: lightgray;
+    border-radius: 8px;
+    min-height: 2rem;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 0 15px rgba(112, 112, 112, 0.1);
+
+    &:hover{
+        box-shadow: 0 4px 8px 0 rgba(112, 112, 112, 0.6); 
+    }
+}
+
+
+.btn-col{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.btn-noBg {
+    border: none; 
+    background-color: white;
+    cursor: pointer;
+  
+    &:hover{
+        box-shadow: 0 4px 8px 0 rgba(112, 112, 112, 0.6); 
+    }
+}
+
+.btn-chevron {
+    border:none;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover{
+        color: darkred;
+        filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+    }
+}
+
+
+.points {
+    width: 3rem;
+    background-color: lightgray;
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+
+    &__container {
+        &--col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            row-gap: 0.5rem;
+        }
+      
+        button{
+          border: none; 
+          background-color: transparent;
+          height: 2rem;
+          cursor: pointer;
+        }
+      
+        fa-icon{
+            font-size: 1.5rem;
+
+            :hover{
+                color: grey;
+            }
+        }
+      }
+}
+
+
+// to the top button
+#myBtn {
+    opacity: 0; /* Hidden by default */
+    position: fixed; /* Fixed/sticky position */
+    bottom: 20px; /* Place the button at the bottom of the page */
+    right: 30px; /* Place the button 30px from the right */
+    z-index: 99; /* Make sure it does not overlap */
+    border: none; /* Remove borders */
+    outline: none; /* Remove outline */
+  
+    cursor: pointer; /* Add a mouse pointer on hover */
+    padding: 10px; /* Some padding */
+    border-radius: 50%; /* Rounded corners */
+    font-size: 1.5em !important; /* Increase font size */
+  }
+  
+  #myBtn:hover {
+    color: #E43020;
+    & fa-icon {
+        filter: drop-shadow(-4px 4px 1px #FBB741);
+    }
+
+  }
+  
+  .show-scrollTop {
+    opacity: 1 !important;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  #myBtn {
+      -moz-transform: rotate(315deg);
+      -webkit-transform: rotate(315deg);
+      -o-transform: rotate(315deg);
+      -ms-transform: rotate(315deg);
+      transform: rotate(315deg);
+  }

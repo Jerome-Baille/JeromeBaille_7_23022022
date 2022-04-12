@@ -14,10 +14,12 @@ export class LoginComponent implements OnInit {
   emailRegex!: RegExp;
   errorMsg!: string;
   returnMsg!: string;
+  isAuth!: any;
 
-  constructor(private AuthService: AuthService,
+  constructor(private authService: AuthService,
               private formBuilder: FormBuilder,
-              private router: Router) { }
+              private router: Router
+              ) { }
 
   ngOnInit(): void {
     this.emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -26,46 +28,33 @@ export class LoginComponent implements OnInit {
       email: [null, [Validators.required, Validators.pattern(this.emailRegex)]],
       password: [null, [Validators.required]]
     });
-  }
 
-  // onSubmitForm(): void {
-  //   const { email, password } = this.loginForm.value;
-  //   this.FaceSnapsService.login(email, password);
-  // }
+    this.authService.headerCheckIsAuth()
+    .subscribe({
+      next: (v) => this.isAuth = v,
+      error: () => this.isAuth = null,
+    })
+  }
 
   onLogin() {
     const { email, password } = this.loginForm.value;
-    this.AuthService.login(email, password)
-    .subscribe(()=>{
-      this.router.navigate(['/']);
-    },
-    (error: any) => {
-      this.errorMsg = error.error.message
+    this.authService.login(email, password)
+    .subscribe({
+      next: (v) => console.log(v),
+      error: (e) => this.errorMsg = e.error.message,
+      complete: () => this.router.navigate(['/'])
+        .then(() =>{
+          window.location.reload()
+        })
     })
   }
 
-  onLogout(): void {
-    // fetch('http://localhost:3000/api/users/logout', {
-    //   method: 'get',
-    //   credentials: 'include'
-  
-    // }).then(function(response) {
-    //   console.log(response)
-  
-    // }).catch(function(err) {
-    //   console.log(err);
-    // });
-
-
-    this.AuthService.logout()
-    .subscribe(data => {
-      // this.returnMsg = JSON.stringify(data)
-      console.log(JSON.stringify(data))
-    },
-    (error: any) => {
-      console.log(error)
+  onLogout() {
+    this.authService.logout()
+    .subscribe({
+      next: (v) => console.log(v),
+      error: (e) => console.error(e),
+      complete: () => window.location.reload()   
     })
-
-    // this.router.navigate(['/'])
   }
 }

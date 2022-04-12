@@ -1,0 +1,28 @@
+<div class="card container container--pink-border">
+  <main class="main main--center main--pt-pb">
+    <form [formGroup]="postForm"> 
+        <div class="form-group form-group--create-post">
+            <div class="form-group--create-post__bubble-pic">
+              <img src="../../assets/default-profile-picture.jpg" alt="">
+            </div>
+              <label for="content" ></label>
+              <textarea class="form-group__textarea form-group__textarea--big" name="content" id="content" form="postForm" formControlName="content"  placeholder="What's on your mind?"></textarea>        
+        </div>
+      <div class="form-group">
+          <label for="attachment"></label>
+          <input id="attachment" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
+          <div class="form-group__img-manager">
+            {{fileUpload.value || 'Aucun fichier séléctionné'}}
+
+            <button (click)="fileUpload.click()">
+              <fa-icon [icon]="faPaperclip"></fa-icon> 
+            </button>
+          </div>
+      </div>
+      <div class="form-group__buttons">
+          <button class="btn" type="submit" (click)="onPost()" [disabled]="postForm.invalid">Poster</button>
+      </div>
+      <p *ngIf="errorMsg">{{ errorMsg }}</p>
+    </form>
+  </main>
+</div>

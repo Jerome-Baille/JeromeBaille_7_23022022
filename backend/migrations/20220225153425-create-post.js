@@ -17,11 +17,11 @@ module.exports = {
         }
       },
       title: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING
       },
       content: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING
       },
       attachment: {
@@ -32,6 +32,16 @@ module.exports = {
         allowNull: false,
         type: Sequelize.BOOLEAN,
         default: true,
+      },
+      isSignaled: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
+        default: false,
+      },
+      points: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        default: 0,
       },
       createdAt: {
         allowNull: false,

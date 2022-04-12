@@ -2,7 +2,7 @@
 const fs              = require ('fs');
 
 // Models
-const { Post, User }  = require('../models');
+const { Post, User, Comment, Like }  = require('../models');
 
 
 // Create a Post
@@ -12,8 +12,12 @@ exports.createPost = (req, res, next) => {
   var title           = req.body.title;
   var content         = req.body.content;
 
-  if (title == null || title.length <= 1) {
-    return res.status(400).json({message: `Veuillez renseigner un titre d'une longueur d'au minimum 2 caractères.`})
+  if( title == null && content == null && req.file == null) {
+    return res.status(400).json({ message: `Veuillez renseigner un message ou ajouter une image.` });
+  }
+
+  if(title != null && title.length <= 1 || content != null && content.length <= 1) {
+    return res.status(400).json({ message: `Votre message doit avoir une longueur d'au minimum 2 caractères.` });
   }
 
   if (tokenUserId){
@@ -22,8 +26,8 @@ exports.createPost = (req, res, next) => {
       })
       .then(function(user){
           if (user){
-            req.file != undefined
-            ? (attachment = `${req.protocol}://${req.get('host')}/images/${req.file}`)
+            req.file !== undefined
+            ? (attachment = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`)
             : (attachment = null);
 
             Post.create({
@@ -63,7 +67,11 @@ exports.getOnePost = (req, res, next) => {
   if (tokenUserId){
     Post.findOne({
       where : { id: paramId },
-      include: [{model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}]
+      include: [
+        {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']},
+        {model: Comment, include: {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}},
+        {model: Like, include: [{model: User, attributes: ['id', 'username', 'isAdmin']}]}
+      ]
     }).then((post) => {
       if (post) {
         res.status(200).json(post);
@@ -89,11 +97,51 @@ exports.getAllPosts = (req, res, next) => {
     if (tokenUserId){
       Post.findAll({
         where: {isActive: true},
+        order: [(order != null) ? order.split(':') : ['createdAt', 'DESC']],
+        attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
+        limit: (!isNaN(limit)) ? limit : null,
+        offset: (!isNaN(offset)) ? offset : null,
+        include: [
+          {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']},
+          {model: Comment, include: {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}},
+          {model: Like, include: [{model: User, attributes: ['id', 'username', 'isAdmin']}]}
+      ],
+      })
+        .then(function(posts) {
+          if (posts) {
+            res.status(200).json(posts);
+          } else {
+            res.status(404).json({ message: `Aucun post n'a été trouvé.` });
+          }
+        })
+        .catch(function(err) {
+          res.status(500).json({ message: err });
+        });
+    } else {
+      return res.status(403).json({message: `Vous n'êtes pas autorisé à effectuer cette action.`})
+    }
+};
+
+exports.getSignaledPosts = (req, res, next) => {
+    // Params
+    var tokenUserId     = req.auth.userId;
+    var fields          = req.query.fields;
+    var limit           = parseInt(req.query.limit);
+    var offset          = parseInt(req.query.offset);
+    var order           = req.query.order;
+
+    if (tokenUserId){
+      Post.findAll({
+        where: {isSignaled: true},
         order: [(order != null) ? order.split(':') : ['updatedAt', 'DESC']],
         attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
         limit: (!isNaN(limit)) ? limit : null,
         offset: (!isNaN(offset)) ? offset : null,
-        include: [{model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}]
+        include: [
+          {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']},
+          {model: Comment, include: {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}},
+          {model: Like, include: [{model: User, attributes: ['id', 'username', 'isAdmin']}]}
+      ],
       })
         .then(function(posts) {
           if (posts) {
@@ -122,19 +170,79 @@ exports.updatePost = (req, res, next) => {
   })
     .then(function(postFound){
       if (postFound.userId == tokenUserId || tokenIsAdmin == true){
-        const postObject = req.file
-        ? {
-            ...req.body.postFound,
-            attachment: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+        if (req.file){
+          if (postFound.avatar != null){
+            const image = postFound.attachment.split("/images/")[1];
+            fs.unlink(`images/${image}`, () => {
+              const postObject = {
+                ...req.body,
+                attachment: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+              }
+              Post.update(
+                { ...postObject, id: paramId },
+                { where: { id: paramId } }
+              )
+                .then(() => res.status(200).json({ message : `Post modifié avec succès !` }))
+                .catch((err) => res.status(400).json({ message: err }));
+            });
+          } else {
+            const postObject = {
+              ...req.body,
+              attachment: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+            }
+            Post.update(
+              { ...postObject, id: paramId },
+              { where: { id: paramId } }
+            )
+              .then(() => res.status(200).json({ message : `Post modifié avec succès !` }))
+              .catch((err) => res.status(400).json({ message: err }));
           }
-        : { ...req.body };
 
-        Post.update(
-          { ...postObject, id: paramId },
-          { where: { id: paramId } }
-        )
-          .then(() => res.status(200).json({ message : `Post modifié !` }))
-          .catch((err) => res.status(400).json({ message: err }));
+        } else {
+          const postObject = {
+            ...req.body,
+          }
+          Post.update(
+            { ...postObject, id: paramId },
+            { where: { id: paramId } }
+          )
+            .then(() => res.status(200).json({ message : `Post modifié avec succès !` }))
+            .catch((err) => res.status(400).json({ message: err }));
+        }        
+      } else {
+        return res.status(403).json({ message: `Vous n'êtes pas autorisé à effectuer cette action.` })
+      }
+    })
+  .catch(function(err) {
+    return res.status(500).json ({ message : err })
+  });
+};
+
+// Remove image from post
+exports.removeImage = (req, res, next) => {
+  // Params
+  var tokenUserId     = req.auth.userId;
+  var tokenIsAdmin    = req.auth.isAdmin;
+  var paramId         = req.params.id;
+
+  Post.findOne({
+    where: {id: paramId}
+  })
+    .then(function(postFound){
+      if (postFound.userId == tokenUserId || tokenIsAdmin == true){
+        if (postFound.attachment){
+          const image = postFound.attachment.split("/images/")[1];
+          fs.unlink(`images/${image}`, () => {
+            postFound.update({ 
+              attachment: null 
+            })
+              .then(() => res.status(200).json({ message : `Image supprimée !` }))
+              .catch((err) => res.status(400).json({ message: err }));
+          })
+        } else {
+          return res.status(400).json({ message: `Aucune image n'a été trouvée.` })
+        }
+        
       } else {
         return res.status(403).json({ message: `Vous n'êtes pas autorisé à effectuer cette action.` })
       }
@@ -151,17 +259,21 @@ exports.deletePost = (req, res, next) => {
     var tokenIsAdmin    = req.auth.isAdmin;
     var paramId         = req.params.id;
   
-
   Post.findOne({
     where: { id: paramId }
   })
     .then(function(postFound){
       if (postFound.userId == tokenUserId || tokenIsAdmin == true){
-        var image = postFound.attachment;
-        fs.unlink(`${image}`, () => {
-          postFound.destroy()
-        })
-        return res.status(201).json({ message: `Le post a été supprimé avec succès.` });
+        if(postFound.attachment){
+          const image = postFound.attachment.split("/images/")[1];
+          fs.unlink(`images/${image}`, () => {
+            postFound.destroy()
+          })
+          return res.status(201).json({ message: `Le post a été supprimé avec succès.` });
+        } else {
+            postFound.destroy()
+          return res.status(201).json({ message: `Le post a été supprimé avec succès.` });
+        }
       } else {
         return res.status(403).json({ message: `Vous n'êtes pas autorisé à effectuer cette action.` })
       }
@@ -170,3 +282,55 @@ exports.deletePost = (req, res, next) => {
       return res.status(500).json ({ message : err })
   });
 };
+
+// Report a post
+exports.reportPost = (req, res, next) => {
+  // Params
+  var tokenUserId     = req.auth.userId;
+  var isAdmin         = req.auth.isAdmin;
+  var paramId         = req.params.id;
+
+  Post.findOne({
+    where: { id: paramId }
+  })
+    .then(function(postFound){
+      if(postFound.isSignaled == false){
+        postFound.update({ isSignaled: true })
+        .then(() => res.status(200).json({ message: `Le post a été signalé avec succès.` }))
+        .catch((error) => res.status(400).json({ error }));
+      } else {
+        return res.status(201).json({ message: `Le post a déjà été signalé.` });
+      }
+    })
+    .catch(function(err) {
+      return res.status(500).json ({ message : err })
+  });
+}
+
+// Unreport on post
+exports.unreportPost = (req, res, next) => {
+  // Params
+  var tokenUserId     = req.auth.userId;
+  var isAdmin         = req.auth.isAdmin;
+  var paramId         = req.params.id;
+
+  Post.findOne({
+    where: { id: paramId }
+  })
+    .then(function(postFound){
+      if (isAdmin == true){
+        if(postFound.isSignaled == true){
+          postFound.update({ isSignaled: false, isActive: true })
+          .then(() => res.status(200).json({ message: `Le signalement a été supprimé avec succès.` }))
+          .catch((error) => res.status(400).json({ error }));
+        } else {
+          return res.status(201).json({ message: `Le post n'est pas signalé.` });
+        }
+      } else {
+        return res.status(403).json({ message: `Vous n'êtes pas autorisé à effectuer cette action.` })
+      }
+    })
+    .catch(function(err) {
+      return res.status(500).json ({ message : err })
+  });
+}

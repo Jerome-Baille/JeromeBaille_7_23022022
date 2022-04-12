@@ -14,13 +14,18 @@ module.exports = {
       },
       username: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       password: {
         allowNull: false,
         type: Sequelize.STRING
       },
       bio: {
+        allowNull: true,
+        type: Sequelize.STRING
+      },
+      avatar: {
         allowNull: true,
         type: Sequelize.STRING
       },

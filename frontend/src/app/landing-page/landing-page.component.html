@@ -1,6 +1,8 @@
-<div class="landing-block">
-    <img src="assets/icon-above-font.png" alt="logo Groupomania">
-    <div class="landing-links">
-      <button (click)="onContinue()">Continuer vers Groupomania</button>
+<div class="card container container--single">
+  <main class="main main--center main--pt-pb">
+    <img class="main__content__container__img main__content__container__img--limit-landing-page" src="assets/icon-above-font.png" alt="logo Groupomania">
+    <div class="form-group__buttons">
+      <button class="btn" *ngIf="isAuth" (click)="onContinue()">Continuer vers Groupomania</button>
     </div>
-  </div>
+  </main>
+</div>

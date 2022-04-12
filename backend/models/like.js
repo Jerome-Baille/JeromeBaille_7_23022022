@@ -10,7 +10,8 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      models.Like.belongsTo(models.Post);
+      Like.belongsTo(models.Post, { foreignKey: 'postId'}, { onDelete: 'cascade', hooks: true })
+      Like.belongsTo(models.User, { foreignKey: 'userId'}, { onDelete: 'cascade', hooks: true })
     }
   }
   Like.init({

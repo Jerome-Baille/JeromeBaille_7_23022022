@@ -1,0 +1,83 @@
+<div *ngIf="isAuth; else denied" class="dashboard-container">
+    <header class="dashboard-container__card" *ngIf="isAuth.isAdmin; else denied">
+        <h2>Admin Dashboard</h2>
+    </header>
+
+    <div class="dashboard-container__card">
+      <div class="tab">
+        <input type="checkbox" id="chck1">
+        <label class="tab-label" for="chck1">
+            <h2>Gestion des utilisateurs</h2>
+            <p>Cliquez ici pour rechercher un utilisateur</p>
+        </label>
+        <div class="tab-content">
+          <form class="dashboard-container__card__form" [formGroup]="userForm">
+            <div class="form-group">
+              <label for="select-user">Utilisateur </label>
+              <select  id="select-user" formControlName="users" (change)="valueChange($event)">
+                <option *ngFor="let user of users$ | async" [value]="user.id">
+                  {{ user.username }}
+                </option>
+              </select>
+            </div>
+
+            <button class="btn" type="submit" (click)="onSubmitForm()" [disabled]="userForm.invalid">Submit</button>
+          </form>         
+    
+          <div class="selected-user" *ngIf="displayProfile!= 0">
+            <app-profile *ngIf="displayProfile" [displayProfile]="displayProfile"></app-profile>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-container__card">
+      <div class="dashboard-container__card__empty" *ngIf="!(posts$ | async)?.length; else signaledMsg">
+        <h2>Gestion des messages signalés</h2>
+        <p>Aucun message signalé</p>
+      </div>
+
+      <ng-template #signaledMsg>
+        <div class="tab">
+          <input type="checkbox" id="chck2">
+          <label class="tab-label" for="chck2">
+            <h2>Gestion des messages signalés</h2>
+            <p *ngIf="(posts$ | async)?.length == 1">Vous avez 1 message signalé, cliquez pour le voir.</p>
+            <p *ngIf="(posts$ | async)?.length != 1">Vous avez {{ (posts$ | async)?.length }} messages signalés, cliquez pour les voir</p>
+          </label>
+          <div class="tab-content" >
+              <app-post class="reported-msg" *ngFor="let post of posts$ | async" [post]="post"></app-post>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+    
+    <div class="dashboard-container__card">
+      <div class="dashboard-container__card__empty" *ngIf="!(comments$ | async)?.length; else signaledCom">
+        <h2>Gestion des messages signalés</h2>
+        <p>Aucun message signalé</p>
+      </div>
+
+      <ng-template #signaledCom>
+        <div class="tab">
+          <input type="checkbox" id="chck3">
+          <label class="tab-label" for="chck3">
+              <h2>Gestion des commentaires</h2>
+              <p *ngIf="(comments$ | async)?.length == 1">Vous avez 1 commentaire signalé, cliquez pour le voir.</p>
+              <p *ngIf="(comments$ | async)?.length != 1">Vous avez {{ (comments$ | async)?.length }} commentaires signalés, cliquez pour les voir</p>
+            </label>
+          <div class="tab-content" >
+            <app-comment *ngFor="let com of comments$ | async" [c]="com"></app-comment>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+</div>
+
+
+<ng-template #denied>
+    <div class="dashboard-container__card">
+        <h2>Vous n'êtes pas autorisé à voir cette page</h2>
+    </div>
+</ng-template>

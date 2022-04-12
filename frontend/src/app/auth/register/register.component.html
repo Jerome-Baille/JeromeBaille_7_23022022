@@ -1,37 +1,25 @@
-<!-- <div class="container">
-  <div class="form">
-    <form [formGroup]="registerForm" class="register-form">
-      <label for="email"></label>
-      <input type="email" id="email" formControlName="email" placeholder="Email">
-      <label for="username"></label>
-      <input type="text" id="username" formControlName="username" placeholder="Username">
-      <label for="password"></label>
-      <input type="password" id="password" formControlName="password" placeholder="Password">
-      <button type="submit" (click)="onRegister()" [disabled]="registerForm.invalid" class="btn">Register</button>
-      <p class="message">Already registered?<a routerLink="/login"> Sign in</a></p>
-      <p *ngIf="errorMsg">{{ errorMsg }}</p>
-    </form> 
-  </div>
-</div> -->
-
-<div class="form-card">
-  <h2>Register</h2>
-  <form [formGroup]="registerForm">   
-    <div class="form-group">
-        <label for="email">Email </label>
-        <input id="email" type="email" formControlName="email">
-    </div>
-    <div class="form-group">
-      <label for="username">Username </label>
-      <input id="username" type="text" formControlName="username">
-  </div>
-    <div class="form-group">
-        <label for="password">Password </label>
-        <input id="password" type="password" formControlName="password">
-    </div>
-    <div class="action-buttons">
-        <button type="submit" (click)="onRegister()" [disabled]="registerForm.invalid">Enregistrer</button>
-    </div>
-    <p *ngIf="errorMsg">{{ errorMsg }}</p>
-  </form>
+<div class="card container container--single container--single__auth">
+  <main class="main">
+    <h2>Creer un compte</h2>
+    <form [formGroup]="registerForm">   
+      <div class="form-group">
+          <label for="email">E-mail </label>
+          <input id="email" type="email" formControlName="email">
+      </div>
+      <div class="form-group">
+        <label for="username">Pseudo </label>
+        <input id="username" type="text" formControlName="username">
+      </div>
+      <div class="form-group">
+          <label for="password">Mot de passe </label>
+          <input id="password" type="password" formControlName="password">
+      </div>
+      <div class="form-group__buttons">
+          <button class="btn" type="submit" (click)="onRegister()" [disabled]="registerForm.invalid">Enregistrer</button>
+      </div>
+      <p class="form-group__alert-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+    </form>
+  
+    <p class="main__footer--profile__log">Vous avez un compte? <a routerLink="/login">Connectez-vous</a></p>
+  </main>
 </div>
