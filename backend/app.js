@@ -5,6 +5,7 @@ const bodyParser    = require('body-parser');
 const cookieParser  = require('cookie-parser');
 
 require ("dotenv").config(); // Loads environment variables from .env file
+const helmet = require("helmet"); // A collection of 13 middleware functions for setting HTTP response headers
 
 
 // Routes
@@ -14,6 +15,7 @@ const likeRoutes    = require('./routes/like');
 const commentRoutes = require('./routes/comments');
 
 const app = express();
+app.use(helmet());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -27,6 +29,8 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Credentials', true);
     next();
 });
+
+
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 

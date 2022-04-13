@@ -35,14 +35,12 @@
                 </a> 
             </div>
         </div>
-        <div *ngIf="toggle == true && isMobileLayout" class="nav__list__elements">
+        <div *ngIf="toggle == true" class="nav__list__elements hide">
             <a *ngIf="isAuth" routerLink="wall" routerLinkActive="active">Accueil</a>
-
             <div class="nav__list__elements__isAuth" *ngIf="isAuth; else login">
                 <a href="profil/{{isAuth.userId}}" routerLinkActive="active">Profil</a>
                 <a routerLink="login" routerLinkActive="active" >Se déconnecter</a>
             </div>
-
             <ng-template #login>
                 <a routerLink="register" routerLinkActive="active">S'enregistrer</a>
                 <a routerLink="login" routerLinkActive="active">Se connecter</a>

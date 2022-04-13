@@ -34,8 +34,6 @@ export class HeaderComponent implements OnInit {
       next: (v) => this.isAuth = v,
       error: () => this.isAuth = null
     })
-
-    window.onresize = () => this.isMobileLayout = window.innerWidth <= 768;
   }
 
 
