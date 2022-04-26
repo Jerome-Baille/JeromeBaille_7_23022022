@@ -15,7 +15,8 @@ module.exports = {
           model: 'Users',
           key: 'id'
         },
-        onDelete: 'CASCADE'
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       postId: {
         allowNull: false,
@@ -24,7 +25,8 @@ module.exports = {
           model: 'Posts',
           key: 'id'
         },
-        onDelete: 'CASCADE'
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       content: {
         allowNull: true,

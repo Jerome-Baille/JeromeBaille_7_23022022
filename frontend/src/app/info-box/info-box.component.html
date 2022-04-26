@@ -1,0 +1,9 @@
+<div id="success-box" class="success-box" [ngClass]="infoMsg? '' : 'success-box--hide' ">
+    <fa-icon class="success-box__icon" [icon]="faCircleCheck"></fa-icon>
+    <span *ngIf="infoMsg" class="success-box__text">{{ infoMsg }}</span>
+</div>
+
+<div id="error-box" class="error-box" [ngClass]="errorMsg? '' :'error-box--hide' ">
+    <fa-icon class="error-box__icon" [icon]="faCircleXmark"></fa-icon>
+    <span *ngIf="errorMsg" class="error-box__text">{{ errorMsg }}</span>
+</div>

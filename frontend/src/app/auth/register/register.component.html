@@ -17,7 +17,7 @@
       <div class="form-group__buttons">
           <button class="btn" type="submit" (click)="onRegister()" [disabled]="registerForm.invalid">Enregistrer</button>
       </div>
-      <p class="form-group__alert-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+      <app-info-box [infoBox]="infoBox"></app-info-box>
     </form>
   
     <p class="main__footer--profile__log">Vous avez un compte? <a routerLink="/login">Connectez-vous</a></p>

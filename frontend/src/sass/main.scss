@@ -2,6 +2,7 @@
 
 /* Utils */
 @import "utils/mixins";
+@import "utils/animations";
 
 /* Base */
 @import "base/base";
@@ -13,7 +14,9 @@
 
 /* Components */
 @import "./components/buttons";
-// @import "./components/loading-spinner";
+@import "./components/loading";
+@import "./components/info-box";
+@import "./components/dropdown";
 
 /* Layouts */
 @import "./layouts/header";

@@ -1,5 +1,8 @@
-<div *ngIf="isAuth; else denied" class="dashboard-container">
-    <header class="dashboard-container__card" *ngIf="isAuth.isAdmin; else denied">
+<app-loading *ngIf="loading; else loaded"></app-loading>
+
+<ng-template #loaded>
+  <div *ngIf="isAdmin; else denied" class="dashboard-container">
+    <header class="dashboard-container__card">
         <h2>Admin Dashboard</h2>
     </header>
 
@@ -68,16 +71,17 @@
               <p *ngIf="(comments$ | async)?.length != 1">Vous avez {{ (comments$ | async)?.length }} commentaires signalés, cliquez pour les voir</p>
             </label>
           <div class="tab-content" >
-            <app-comment *ngFor="let com of comments$ | async" [c]="com"></app-comment>
+            <app-comment *ngFor="let comment of comments$ | async" [com]="comment"></app-comment>
           </div>
         </div>
       </ng-template>
     </div>
-</div>
+  </div>
 
-
-<ng-template #denied>
-    <div class="dashboard-container__card">
-        <h2>Vous n'êtes pas autorisé à voir cette page</h2>
+  <ng-template #denied>
+    <div class="card card--denied">
+      <h2>Veuillez vous connecter pour accéder à cette page</h2>
+      <button class="btn" (click)="onToLogin()">Se connecter</button>
     </div>
+  </ng-template>
 </ng-template>

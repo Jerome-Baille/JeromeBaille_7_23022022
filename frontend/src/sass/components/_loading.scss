@@ -1,0 +1,43 @@
+/*
+Loading spinner
+*/
+@keyframes opacity-loading { /* The 'loading spinner' partially hides the content of the page when displayed */
+    to {
+        opacity:0;
+        z-index: -9999;
+    }
+}
+
+@keyframes spin { /* Makes the circle inside the 'loading spinner' spin */
+    to {transform: rotate(360deg);}
+}
+
+.loading-spinner { /* 'Chargement' animation on the index page */
+    position: fixed;
+    height: 100vh; /* To make sure the loading spinner cover the whole page */
+    width: 100%;
+    inset: 0;
+    background-color: white;
+    z-index: 9999;
+    opacity: 0.9; /* Partially reveals the content of the page */
+    animation: opacity-loading infinite infinite forwards; /* The 'loading spinner' spins for 1.5s and takes 0.5s to disappear */
+    display: grid;
+    place-items: center;
+    &__circle { /* the circle spinner is created thanks to a box and rounded corners */
+        height: 3rem;
+        width: 3rem;
+        margin: auto;
+        border-top: 0.2rem solid pink;
+        border-right: 0.2rem solid aquamarine;
+        border-bottom: 0.2rem solid pink;
+        border-left: 0.2rem solid aquamarine;
+        border-radius: 100%;
+        animation: spin 1.5s infinite linear; /* The circle rotates 360deg in 1.5s and then repeats this action until we close it */
+    }
+    &__text { /* Display 'Chargement' under the circle */
+        font-size: 1rem;
+        text-transform: uppercase;
+        color: darken($color: #F2F2F2, $amount: 60%);
+        font-weight: normal;
+    }
+}

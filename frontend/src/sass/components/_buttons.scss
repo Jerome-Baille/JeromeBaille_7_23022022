@@ -1,3 +1,24 @@
+.btn--close {
+    display: flex; 
+    justify-content: flex-end; 
+    padding:0.5rem 1rem;
+
+    & button {
+        width:20px;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+        border:none;
+        font-size: 1.5rem;
+
+        &:hover {
+            cursor: pointer;
+            filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+        }
+    }
+}
+
 .btn {
     background: #FFE0E0;
     border-radius: 8px;
@@ -37,8 +58,41 @@
 
 .btn-noBg {
     border: none; 
+    border-radius: 8px;
     background-color: white;
+    margin-right: 8px;
     cursor: pointer;
+
+    & .faCircleExclamation {
+        color: sandybrown;
+    }
+    & .faThumbsUp, .faPenToSquare {
+        color: olivedrab;
+    }
+    & .faTrash, .faUserSlash {
+        color: #dd1b16;
+    }
+    & .faUserGraduate {
+        color: goldenrod;
+    }
+
+
+    &:last-child{
+        margin-right: 0;
+    }
+
+    & div {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        row-gap: 10px;
+        padding: 5px;
+    }
+
+    & p {
+        margin: 0;
+    }
   
     &:hover{
         box-shadow: 0 4px 8px 0 rgba(112, 112, 112, 0.6); 

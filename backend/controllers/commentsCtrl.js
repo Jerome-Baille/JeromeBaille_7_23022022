@@ -8,7 +8,7 @@ const { Post, User, Comment, ComLike } = require('../models');
 exports.createComment = (req, res, next) => {
     // Params
     var tokenUserId     = req.auth.userId;
-    var postId         = req.params.postId;
+    var postId          = req.params.postId;
     var content         = req.body.content;
 
     if (content == null && req.file == null) {
@@ -72,6 +72,10 @@ exports.getPostComments = (req, res, next) => {
     // Params
     var tokenUserId     = req.auth.userId;
     var postId         = req.params.postId;
+    var fields          = req.query.fields;
+    var limit           = parseInt(req.query.limit);
+    var offset          = parseInt(req.query.offset);
+    var order           = req.query.order;
 
   if (tokenUserId){
     Post.findOne({
@@ -82,8 +86,15 @@ exports.getPostComments = (req, res, next) => {
     }).then((postFound) => {
       if (postFound) {
         Comment.findAll({
+          order: [(order != null) ? order.split(':') : ['createdAt', 'DESC']],
+          attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
+          limit: (!isNaN(limit)) ? limit : null,
+          offset: (!isNaN(offset)) ? offset : null,
           where: {postId: postFound.id },
-          include : [{model: ComLike}]
+          include : [
+            {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']},
+            {model: ComLike}
+          ]
         })
         .then(function(comments) {
             if (comments) {
@@ -154,11 +165,14 @@ exports.getReportedComments = (req, res, next) => {
     if (tokenIsAdmin){
       Comment.findAll ({
         where: {isSignaled: true},
-        order: [(order != null) ? order.split(':') : ['createdAt', 'ASC']],
+        order: [(order != null) ? order.split(':') : ['createdAt', 'DESC']],
         attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
         limit: (!isNaN(limit)) ? limit : null,
         offset: (!isNaN(offset)) ? offset : null,
-        include : [{model: User, attributes: ['id', 'username', 'bio', 'isAdmin']}]
+        include : [
+          {model: User, attributes: ['id', 'username', 'bio', 'isAdmin']},
+          {model: ComLike}
+        ]
     })
     .then(function(comments) {
         if (comments) {
@@ -201,7 +215,7 @@ exports.updateComment = (req, res, next) => {
               { ...commentObject, id: paramComId },
               { where: { id: paramComId } }
             )
-              .then(() => res.status(200).json({ message : `Commentaire modifié avec succès !` }))
+              .then(() => res.status(200).json({ message : `Commentaire modifié avec succès !`,  body: commentObject }))
               .catch((err) => res.status(400).json({ message: err }));
           });
         } else {
@@ -213,7 +227,7 @@ exports.updateComment = (req, res, next) => {
               { ...commentObject, id: paramComId },
               { where: { id: paramComId } }
             )
-              .then(() => res.status(200).json({ message : `Commentaire modifié avec succès !` }))
+              .then(() => res.status(200).json({ message : `Commentaire modifié avec succès !`,  body: commentObject }))
               .catch((err) => res.status(400).json({ message: err }));
         }
       } else {
@@ -225,7 +239,7 @@ exports.updateComment = (req, res, next) => {
           { ...commentObject },
           { where: { id: paramComId } }
         )
-          .then(() => res.status(200).json({ message : `Commentaire modifié avec succès !` }))
+          .then(() => res.status(200).json({ message : `Commentaire modifié avec succès !`, body: commentObject }))
           .catch((err) => res.status(400).json({ message: err }));
       }
     } else {

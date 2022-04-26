@@ -221,13 +221,14 @@ exports.getAllUsers = (req, res, next) => {
 };
 
 // Read user profile
-exports.getUserProfile = (req, res, next) => {
+exports.getOneUser = (req, res, next) => {
     // Params
     var paramId         = req.params.id;
 
     User.findOne({
         attributes: ['id', 'email', 'username', 'bio', 'avatar', 'isAdmin', 'createdAt'],
-        where: {id: paramId}
+        where: {id: paramId},
+        include: [{model: Post}]
     })
     .then(function(user){
         if (user){
@@ -378,18 +379,97 @@ exports.deleteUserProfile = (req, res, next) => {
                 if(user.avatar){
                     const filename = user.avatar.split('/images/')[1];
                     fs.unlink(`images/${filename}`, () => {
+
+                        // check if the user liked any posts
+                        Like.findAll({
+                            where: {userId: paramId}
+                        })
+                        .then(function(likes){
+                            // for each likes/dislikes of the user, we remove/add the corresponding amount of point to the post
+                            likes.forEach(function(like){
+                                if(like.isLiked){
+                                    Post.findOne({
+                                        where: {id: like.PostId}
+                                    })
+                                    .then((postFound) =>{
+                                        postFound.update({
+                                            points: postFound.points - 1
+                                        })
+                                    })
+                                    .catch((err) =>{
+                                        console.log(err)
+                                    })
+                                } else {
+                                    Post.findOne({
+                                        where: {id: like.PostId}
+                                    })
+                                    .then((postFound) => {
+                                        postFound.update({
+                                            points: postFound.points + 1
+                                        })
+                                    })
+                                    .catch(function(err){
+                                        console.log(err)
+                                    })
+                                }
+                            })
+                        })
+                        .then(() => {
+                            user.destroy()
+                            return res
+                                .clearCookie("jwt", {domain: 'localhost', path: '/'})
+                                .status(200)
+                                .json({message: `Le compte a été supprimé avec succès.`})
+                        })
+                        .catch(function(err){
+                            console.log(err)
+                        })
+                    })
+                } else {
+                    // check if the user liked any posts
+                    Like.findAll({
+                        where: {userId: paramId}
+                    })
+                    .then(function(likes){
+                        // for each likes/dislikes of the user, we remove/add the corresponding amount of point to the post
+                        likes.forEach(function(like){
+                            if(like.isLiked){
+                                Post.findOne({
+                                    where: {id: like.PostId}
+                                })
+                                .then((postFound) => {
+                                    postFound.update({
+                                        points: postFound.points - 1
+                                    })
+                                })
+                                .catch((err) => {
+                                    console.log(err)
+                                })
+                            } else {
+                                Post.findOne({
+                                    where: {id: like.PostId}
+                                })
+                                .then((postFound) =>{
+                                    postFound.update({
+                                        points: postFound.points + 1
+                                    })
+                                })
+                                .catch((err) => {
+                                    console.log(err)
+                                })
+                            }
+                        })
+                    })
+                    .then(() => {
                         user.destroy()
                         return res
                             .clearCookie("jwt", {domain: 'localhost', path: '/'})
                             .status(200)
                             .json({message: `Le compte a été supprimé avec succès.`})
                     })
-                } else {
-                    user.destroy()
-                    return res
-                        .clearCookie("jwt", {domain: 'localhost', path: '/'})
-                        .status(200)
-                        .json({message: `Le compte a été supprimé avec succès.`})
+                    .catch((err) => {
+                        console.log(err)
+                    })
                 }
             } else {
                 res.status(404).json({message: `Aucun utilisateur n'a été trouvé`})

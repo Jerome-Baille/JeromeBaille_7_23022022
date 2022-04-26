@@ -3,7 +3,7 @@
     <h2>Create a comment</h2>
     <form [formGroup]="commentForm">   
         <div class="form-group">
-        <label for="content">Message </label>
+        <label for="content"> </label>
         <textarea class="form-group__textarea form-group__textarea--big" id="content" type="text" formControlName="content"></textarea>
     </div>
     <div class="form-group">
@@ -20,7 +20,7 @@
         <div class="form-group__buttons">
             <button class="btn" type="submit" (click)="onComment()" [disabled]="commentForm.invalid">Enregistrer</button>
         </div>
-        <p *ngIf="errorMsg">{{ errorMsg }}</p>
+        <app-info-box [infoBox]="infoBox"></app-info-box>
     </form>
   </main>
 </div>

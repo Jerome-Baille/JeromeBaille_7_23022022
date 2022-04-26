@@ -18,7 +18,7 @@ export class UsersService {
     // User creation is managed by auth.service.ts
 
   // Read
-  getUserProfile(userId : number): Observable<User> {
+  getOneUser(userId : number): Observable<User> {
     return this.http.get<User>(`http://localhost:3000/api/users/${userId}`, {withCredentials: true});
   }
 

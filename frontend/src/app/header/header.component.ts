@@ -9,19 +9,24 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
+  // Get current user id and role (admin or not)
+  userId!: any;
+  isAdmin: boolean = false;
   isAuth: any = [];
-  toggle: boolean = false;
-  isMobileLayout: boolean = false;
 
-  
+  // Toggle menu for mobile display
+  toggle: boolean = false;
+
+  // fontawesome icons for mobile display menu
   faBars = faBars;
 
   constructor(
+    private router: Router,
     private authService: AuthService,
-    private router: Router
     ) { 
       router.events
       .subscribe((event) => {
+        // Close menu (on mobile display) when route changes
         if (event instanceof NavigationEnd) {
           this.toggle = false;
         }
@@ -29,14 +34,29 @@ export class HeaderComponent implements OnInit {
     }
 
   ngOnInit(): void {
-    this.authService.headerCheckIsAuth()
-    .subscribe({
-      next: (v) => this.isAuth = v,
-      error: () => this.isAuth = null
-    })
+    // Get current user id and role (admin or not)
+    this.userId = this.authService.getUserId();
+    this.isAdmin = this.authService.checkIsAdmin();
+
+    if (isNaN(this.userId)) {
+      this.authService.checkIsAuth()
+      .subscribe({
+        next: (v) => {
+          this.isAuth = v
+          this.userId = this.isAuth.userId;
+          this.isAdmin = this.isAuth.isAdmin;  
+        },
+        error: (e) => {
+          if(e.status === 403) {
+            console.log('403 Forbidden');
+          }
+          this.isAuth = null
+        },
+      })
+    }
   }
 
-
+  // Toggle menu for mobile display
   onToggle() {
     this.toggle = !this.toggle;
   }

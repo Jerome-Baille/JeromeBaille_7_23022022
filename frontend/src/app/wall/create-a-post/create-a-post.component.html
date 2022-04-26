@@ -3,7 +3,7 @@
     <form [formGroup]="postForm"> 
         <div class="form-group form-group--create-post">
             <div class="form-group--create-post__bubble-pic">
-              <img src="../../assets/default-profile-picture.jpg" alt="">
+              <img src="{{ user.avatar? user.avatar : '../../assets/default-profile-picture.jpg' }}" alt="Photo de profil de {{user.username}}">
             </div>
               <label for="content" ></label>
               <textarea class="form-group__textarea form-group__textarea--big" name="content" id="content" form="postForm" formControlName="content"  placeholder="What's on your mind?"></textarea>        
@@ -22,7 +22,7 @@
       <div class="form-group__buttons">
           <button class="btn" type="submit" (click)="onPost()" [disabled]="postForm.invalid">Poster</button>
       </div>
-      <p *ngIf="errorMsg">{{ errorMsg }}</p>
+      <app-info-box [infoBox]="infoBox"></app-info-box>
     </form>
   </main>
 </div>

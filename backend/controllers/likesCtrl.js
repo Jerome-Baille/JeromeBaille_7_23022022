@@ -154,7 +154,7 @@ exports.likeComment = (req, res) => {
       if(likeFound) {
         if(!likeFound.isLiked){
           likeFound.update({isLiked: true})
-            .then(() => res.status(201).json({message : `J'ai changé d'avis, j'aime ce commentaire`}))
+            .then(() => res.status(201).json({message : `J'ai changé d'avis, j'aime ce commentaire`, likeFound}))
             .catch(err => res.status(400).json({ message: err }))
           
           Comment.findOne({
@@ -220,7 +220,7 @@ exports.dislikeComment = (req, res) => {
       if(disLikeFound) {
         if(disLikeFound.isLiked){
           disLikeFound.update({isLiked: false})
-            .then(() => res.status(201).json({message : `J'ai changé d'avis, je n'aime pas ce commentaire`}))
+            .then(() => res.status(201).json({message : `J'ai changé d'avis, je n'aime pas ce commentaire`, disLikeFound}))
             .catch(err => res.status(400).json({ message: err }))
 
           Comment.findOne({

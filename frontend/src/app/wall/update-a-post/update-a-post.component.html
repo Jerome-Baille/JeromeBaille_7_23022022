@@ -27,7 +27,7 @@
       <div class="form-group__buttons">
           <button class="btn" type="submit" (click)="onUpdatePost()" [disabled]="updatePostForm.invalid">Enregistrer</button>
       </div>
-      <p class="form-group__alert-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+      <app-info-box [infoBox]="infoBox"></app-info-box>
     </form>
   </main>
 </div>

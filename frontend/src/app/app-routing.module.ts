@@ -9,7 +9,6 @@ import { ProfileComponent } from './profile/profile.component';
 import { ProfileUpdateComponent } from './profile-update/profile-update.component';
 import { UpdateAPostComponent } from './wall/update-a-post/update-a-post.component';
 import { CreateACommentComponent } from './comments/create-a-comment/create-a-comment.component';
-import { CommentsListComponent } from './comments/comments-list/comments-list.component';
 import { AdminDashboardComponent } from './admin/admin-dashboard.component';
 
 
@@ -20,7 +19,6 @@ const routes: Routes = [
     { path: 'wall/:id', component: SinglePostComponent},
     { path: 'wall/:id/update', component: UpdateAPostComponent},
     { path: 'wall/:id/comment', component: CreateACommentComponent},
-    { path: 'wall/:id/allTheComments', component: CommentsListComponent},
 
     { path: 'register', component: RegisterComponent },
     { path: 'login', component: LoginComponent },

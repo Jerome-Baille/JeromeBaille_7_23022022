@@ -1,8 +1,10 @@
 <div class="card__aside">
     <a class="card__link" routerLink="{{post.id}}">
-        <p class="main-content">{{ (post.content.length>160)? (post.content|slice:0:160)+' ...' : (post.content) }}</p>
+        <section class="main-content__container">
+            <img class="main-content__img" *ngIf="post.attachment" [src]="post.attachment" alt="{{ post.attachment }}">
+            <p class="main-content__text" *ngIf="post.content">{{ post.content }}</p>  
+        </section>
 
-    
         <footer>
             <p>
                 Publié par <a class="user-link" routerLink="/profil/{{post.User.id}}">{{ post.User.username }}</a>
@@ -11,6 +13,5 @@
                 il y a {{ calculateDiff() }}
             </p>
         </footer>
-
     </a>
 </div>

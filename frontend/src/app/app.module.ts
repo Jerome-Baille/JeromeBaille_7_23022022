@@ -19,12 +19,13 @@ import { ProfileUpdateComponent } from './profile-update/profile-update.componen
 import { CreateAPostComponent } from './wall/create-a-post/create-a-post.component';
 import { UpdateAPostComponent } from './wall/update-a-post/update-a-post.component';
 import { CreateACommentComponent } from './comments/create-a-comment/create-a-comment.component';
-import { CommentsListComponent } from './comments/comments-list/comments-list.component';
 import { CommentComponent } from './comments/comment/comment.component';
 import { UpdateACommentComponent } from './comments/update-a-comment/update-a-comment.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AdminDashboardComponent } from './admin/admin-dashboard.component';
 import { MostPopularComponent } from './wall/most-popular/most-popular.component';
+import { LoadingComponent } from './loading/loading.component';
+import { InfoBoxComponent } from './info-box/info-box.component';
 
 @NgModule({
   declarations: [
@@ -41,11 +42,12 @@ import { MostPopularComponent } from './wall/most-popular/most-popular.component
     CreateAPostComponent,
     UpdateAPostComponent,
     CreateACommentComponent,
-    CommentsListComponent,
     CommentComponent,
     UpdateACommentComponent,
     AdminDashboardComponent,
     MostPopularComponent,
+    LoadingComponent,
+    InfoBoxComponent,
   ],
   imports: [
     BrowserModule,

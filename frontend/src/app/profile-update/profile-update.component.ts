@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { faPaperclip, faTrashCan } from '@fortawesome/free-solid-svg-icons';
@@ -12,13 +12,24 @@ import { UsersService } from '../services/users.service';
   styleUrls: ['./profile-update.component.scss']
 })
 export class ProfileUpdateComponent implements OnInit {
+  // data sent to the parent component
+  @Output() 
+  profileUpdated: EventEmitter<any> = new EventEmitter<any>();
+  
+  // Get profile data
   @Input() displayProfile!: User;
+
+
   userProfile$!: Observable<User>;
   getData!: any;
-  usersForm!: FormGroup;
-  responseMsg: any = [];
-  errorMsg: any = [];
 
+  // Form variables
+  usersForm!: FormGroup;
+
+  // Info variables (success, error, loading)
+  infoBox: any = {};
+
+  // FontAwesome Icons
   faPaperclip = faPaperclip;
   faTrashCan = faTrashCan;
 
@@ -39,11 +50,11 @@ export class ProfileUpdateComponent implements OnInit {
     });
 
     const userId = +this.route.snapshot.params['id'];
-    this.userProfile$ = this.usersService.getUserProfile(userId); 
+    this.userProfile$ = this.usersService.getOneUser(userId); 
   }
 
   updateProfile(userId: number){
-    this.usersService.getUserProfile(userId)
+    this.usersService.getOneUser(userId)
     .subscribe((data)=>{
       this.getData = data;
       console.log(this.getData)
@@ -51,6 +62,7 @@ export class ProfileUpdateComponent implements OnInit {
   };
 
   
+  // Detects if the user has uploaded a picture
   onFileSelected(event: any) {
     const file = event.target.files[0];
     this.usersForm.get('avatar')!.setValue(file);
@@ -59,6 +71,7 @@ export class ProfileUpdateComponent implements OnInit {
     reader.readAsDataURL(file);
   }
 
+  // On submit update the user profile or display error message
   onSubmitForm(){
     const userId = this.displayProfile.id;
 
@@ -67,28 +80,28 @@ export class ProfileUpdateComponent implements OnInit {
 
     this.usersService.updateProfile(userId, username, email, bio, avatar)
     .subscribe({
-      next: (v) => this.responseMsg = v,
-      error: (e) => this.errorMsg = e.error.message,
+      next: (v) => this.infoBox = {'infoMsg' : v},
+      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
       complete: () => window.location.reload()  
     });
 
     if(this.usersForm.value.password){
     this.usersService.updatePassword(userId, password)
     .subscribe({
-      next: (v) => this.responseMsg = v,
-      error: (e) => this.errorMsg = e.error.message,
-      complete: () => console.info('complete')
+      next: (v) => this.infoBox = {'infoMsg' : v},
+      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      complete: () => this.profileUpdated.emit({message : 'post updated', 'info': this.infoBox.infoMsg, 'error': this.infoBox.errorMsg})
     })
     }
   }
 
-
+// Delete the user profile picture
   onDelPicture() {
     this.usersService.removePicture(this.displayProfile.id)
     .subscribe({
-      next: (v) => console.log(v),
-      error: (e) => console.error(e),
-      complete: () => window.location.reload()
+      next: (v) => this.infoBox = {'infoMsg' : v},
+      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      complete: () => console.info('complete')
     })
   }
 }

@@ -1,31 +1,36 @@
-<div class="card container container--single container--single__auth" *ngIf="(isAuth && isAuth.length!= 0); else login">
-  <main class="main">
-    <h2>Êtes-vous sûr de vouloir vous déconnecter ?</h2>
-    <button class="btn btn--center" type="submit" (click)="onLogout()">Se déconnecter</button>
-    <p class="alert-msg" *ngIf="returnMsg">{{ returnMsg }}</p>
-  </main>
-</div>
+<app-loading *ngIf="loading; else loaded"></app-loading>
 
-<ng-template #login>
-  <div class="card container container--single container--single__auth">
+<ng-template #loaded>
+  <div class="card container container--single container--single__auth" *ngIf="userId; else login">
     <main class="main">
-      <h2>Se connecter</h2>
-      <form [formGroup]="loginForm">   
-        <div class="form-group">
-            <label for="email">E-mail </label>
-            <input id="email" type="email" formControlName="email">
-        </div>
-        <div class="form-group">
-            <label for="password">Mot de passe </label>
-            <input id="password" type="password" formControlName="password">
-        </div>
-        <div class="form-group__buttons">
-            <button class="btn" type="submit" (click)="onLogin()" [disabled]="loginForm.invalid">Enregistrer</button>
-        </div>
-        <p class="form-group__alert-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
-      </form>
-  
-      <p class="main__footer--profile__log">Pas encore de compte? <a routerLink="/register">Inscrivez-vous</a></p>
+      <h2>Êtes-vous sûr de vouloir vous déconnecter ?</h2>
+      <button class="btn btn--center" type="submit" (click)="onLogout()">Se déconnecter</button>
+      
+      <app-info-box [infoBox]="infoBox"></app-info-box>
     </main>
   </div>
+  
+  <ng-template #login>
+    <div class="card container container--single container--single__auth">
+      <main class="main">
+        <h2>Se connecter</h2>
+        <form [formGroup]="loginForm">   
+          <div class="form-group">
+              <label for="email">E-mail </label>
+              <input id="email" type="email" formControlName="email">
+          </div>
+          <div class="form-group">
+              <label for="password">Mot de passe </label>
+              <input id="password" type="password" formControlName="password">
+          </div>
+          <div class="form-group__buttons">
+              <button class="btn" type="submit" (click)="onLogin()" [disabled]="loginForm.invalid">Enregistrer</button>
+          </div>
+          <app-info-box [infoBox]="infoBox"></app-info-box>
+        </form>
+    
+        <p class="main__footer--profile__log">Pas encore de compte? <a routerLink="/register">Inscrivez-vous</a></p>
+      </main>
+    </div>
+  </ng-template>
 </ng-template>

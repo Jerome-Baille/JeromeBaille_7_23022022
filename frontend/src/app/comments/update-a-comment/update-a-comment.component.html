@@ -1,9 +1,14 @@
 <div class="card container">
   <main class="main main--center">
+    <section class="btn--close">
+      <button>
+          <fa-icon [icon]="faCircleXmark" (click)="close()"></fa-icon>
+      </button>
+    </section>
     <form [formGroup]="updateCommentForm">
         <div class="form-group">
-            <label for="content">Message </label>
-            <textarea class="form-group__textarea form-group__textarea--big" id="content" type="text" formControlName="content" placeholder="{{c.content}}"></textarea>
+            <label for="content"></label>
+            <textarea class="form-group__textarea form-group__textarea--big" id="content" type="text" formControlName="content"></textarea>
         </div>
         <div class="form-group">
             <label for="attachment"></label>
@@ -14,7 +19,7 @@
               <button (click)="fileUpload.click()">
                 <fa-icon [icon]="faPaperclip"></fa-icon> 
               </button>
-              <button *ngIf="c.attachment" type="submit" (click)="onDelPicture()">
+              <button *ngIf="comment.attachment" type="submit" (click)="onDelPicture()">
                 <fa-icon [icon]="faTrashCan"></fa-icon>
               </button>
             </div>
@@ -22,7 +27,7 @@
         <div class="form-group__buttons">
             <button class="btn" type="submit" (click)="onUpdateComment()" [disabled]="updateCommentForm.invalid">Modifier</button>
         </div>
-        <p class="form-group__alert-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+        <app-info-box [infoBox]="infoBox"></app-info-box>
     </form>
   </main>
 </div>

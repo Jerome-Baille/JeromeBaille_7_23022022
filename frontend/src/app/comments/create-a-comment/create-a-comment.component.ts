@@ -1,7 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { faPaperclip, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { AuthService } from 'src/app/services/auth.service';
 import { CommentsService } from 'src/app/services/comments.service';
 import { PostsService } from '../../services/posts.service';
 
@@ -11,16 +12,28 @@ import { PostsService } from '../../services/posts.service';
   styleUrls: ['./create-a-comment.component.scss']
 })
 export class CreateACommentComponent implements OnInit {
-  @Input() post!: any;
-  commentForm!: FormGroup;
-  errorMsg!: string;
+  // Infos sent to the parent component
+  @Output() 
+  comCreated: EventEmitter<string> = new EventEmitter<string>();
 
+  // Get post infos from parent component
+  @Input() post!: any;
+
+  // Form variables
+  commentForm!: FormGroup;
+  newComment!: any;
+
+  // Info variables (success, error, loading)
+  infoBox: any = {};
+
+  // FontAwesome Icons
   faPaperclip = faPaperclip;
   faTrashCan = faTrashCan;
 
   constructor(
     private PostsService: PostsService,
     private CommmentsService: CommentsService,
+    private authService: AuthService,
     private formBuilder: FormBuilder,
     private router: Router,
     private route: ActivatedRoute
@@ -33,6 +46,7 @@ export class CreateACommentComponent implements OnInit {
     })
   }
 
+  // Detects if a file is added by user
   onFileSelected(event: any) {
     const file = event.target.files[0];
     this.commentForm.get('attachment')!.setValue(file);
@@ -41,26 +55,35 @@ export class CreateACommentComponent implements OnInit {
     reader.readAsDataURL(file);
   }
 
+  // On submit add a new comment to the database (and store it in the local storage)
   onComment() {
-    // const { content, attachment } = this.commentForm.value;
-    // const postId = this.post.id;
-    // const postId = +this.route.snapshot.params['id'];
-    // this.faceSnapsService.createAComment(postId, content, attachment)
-    // .subscribe({
-    //   next: (v) => console.log(v),
-    //   error: (e) => this.errorMsg = e.error.message,
-    //   complete: () => window.location.reload()  
-    // })
-
     var { content } = this.commentForm.value;
     const postId = this.post.id;
     var attachment = this.commentForm.get('attachment')!.value;
 
-    this.CommmentsService.createAComment(postId, content, this.commentForm.get('attachment')!.value)
+    this.CommmentsService.createAComment(postId, content, attachment)
     .subscribe({
-      next: (v) => console.log(v),
-      error: (e) => this.errorMsg = e.error.message,
-      complete: () => window.location.reload() 
+      next: (v) => { 
+        this.newComment = v;
+        this.CommmentsService.getOneComment(this.newComment.id)
+        .subscribe({
+          next: (v) => {
+            var storedCom = JSON.parse(localStorage.getItem(`post-${this.post.id}`)!);
+
+            if (storedCom) {
+              storedCom.Com.unshift(v);
+              localStorage.setItem(`post-${this.post.id}`, JSON.stringify(storedCom));
+            } else {
+              localStorage.setItem(`post-${postId}`, JSON.stringify({
+                'NewCom' : v
+                }))
+            }
+          },
+          error: (e) => console.error(e),
+        })
+      },
+      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      complete: () => this.comCreated.emit()
     })
   }
 }

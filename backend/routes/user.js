@@ -17,7 +17,7 @@ router.get      ('/logout',       auth,         userCtrl.logout);
 
 router.get      ('/isAuth',       auth,         userCtrl.isAuth);
 router.get      ('/',             auth,         userCtrl.getAllUsers);
-router.get      ('/:id/',         auth,         userCtrl.getUserProfile);
+router.get      ('/:id/',         auth,         userCtrl.getOneUser);
 
 router.get      ('/userPosts/:id',auth,         userCtrl.getUserPosts);
 

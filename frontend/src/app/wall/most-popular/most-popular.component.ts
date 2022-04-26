@@ -7,6 +7,7 @@ import { Post } from 'src/app/models/blog.model';
   styleUrls: ['./most-popular.component.scss']
 })
 export class MostPopularComponent implements OnInit {
+  // Get info from parent component
   @Input() post!: Post;
 
   constructor() { }
@@ -14,6 +15,7 @@ export class MostPopularComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  // Calculate the time difference between now and the post creation date
   calculateDiff(){
     let createdDate = new Date(this.post.createdAt);
     let currentDate = new Date();
