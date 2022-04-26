@@ -77,8 +77,10 @@
                             </table>
                         </div>
                     </div>
+
+                    <app-info-box [infoBox]="infoBox"></app-info-box>
                 </section>
-    
+
                 <section class="main__content__check-container" *ngIf="displayProfile.id == userId || isAdmin">
                     <input type="checkbox" id="{{ displayProfile.id }}" class="checkbox"> 
                     <label for="{{ displayProfile.id }}" class="checkbox__label" [ngClass]="(isAdmin) ? 'xl-fit' : 'm-fit'">
@@ -119,7 +121,7 @@
                 </section> 
                     
                 <footer class="main__footer--profile">
-                    <app-profile-update *ngIf="loadEditProfile" [displayProfile]="displayProfile"></app-profile-update>
+                    <app-profile-update *ngIf="loadEditProfile" [displayProfile]="displayProfile" (profileUpdated)="triggeredFromChildren($event)"></app-profile-update>
                 
                     <div  *ngIf="loadPosts">
                         <app-post *ngFor="let post of userPosts" [post]="post"></app-post>

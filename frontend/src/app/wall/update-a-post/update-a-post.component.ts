@@ -31,8 +31,8 @@ export class UpdateAPostComponent implements OnInit {
 
   ngOnInit(): void {
     this.updatePostForm = this.formBuilder.group({
-      title: [null],
-      content: [null],
+      title: [this.post.title? this.post.title : null],
+      content: [this.post.content? this.post.content : null],
       attachment: [null]
     })
   }

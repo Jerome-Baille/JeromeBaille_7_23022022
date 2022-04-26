@@ -95,7 +95,7 @@
                 
                 <button class="btn--small" (click)="loadChildComponent('loadCreateComment')">Commenter le post</button>
             </footer>
-                <app-create-a-comment *ngIf="loadCreateComment" [post]="post" (comCreated)="triggeredFromChild($event)"></app-create-a-comment>
+                <app-create-a-comment *ngIf="loadCreateComment" [post]="post" (comCreated)="triggeredFromChildren($event)"></app-create-a-comment>
 
                 <div *ngIf="loadComments" class="main__comments-container">
                     <app-comment *ngFor="let comment of comments" [com]="comment" class="main__comments-container__cards"></app-comment>

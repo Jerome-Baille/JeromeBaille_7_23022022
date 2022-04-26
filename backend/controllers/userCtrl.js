@@ -273,7 +273,7 @@ exports.updateUserProfile = (req, res, next) => {
                                 { ...userObject },
                                 { where: { id: paramId} }
                             )
-                                .then(() => res.status(200).json({ message : `L'utilisateur a été modifié avec succès !` }))
+                                .then(() => res.status(200).json({ message : `L'utilisateur a été modifié avec succès !`, userFound }))
                                 .catch((err) => {
                                     if (err.errors[0].validatorKey == `not_unique`){
                                         return res.status(500).json({ message: `Le pseudo choisi existe déjà. Merci d'en choisir un autre.` });
@@ -291,7 +291,7 @@ exports.updateUserProfile = (req, res, next) => {
                             { ...userObject },
                             { where: { id: paramId} }
                         )
-                            .then(() => res.status(200).json({ message : `L'utilisateur a été modifié avec succès !` }))
+                            .then(() => res.status(200).json({ message : `L'utilisateur a été modifié avec succès !`, userFound }))
                             .catch((err) => {
                                 if (err.errors[0].validatorKey == `not_unique`){
                                     return res.status(500).json({ message: `Le pseudo choisi existe déjà. Merci d'en choisir un autre.` });
@@ -308,7 +308,7 @@ exports.updateUserProfile = (req, res, next) => {
                         { ...userObject },
                         { where: { id: paramId} }
                     )
-                        .then(() => res.status(200).json({ message : `L'utilisateur a été modifié avec succès !` }))
+                        .then(() => res.status(200).json({ message : `L'utilisateur a été modifié avec succès !`, userFound }))
                         .catch((err) => {
                             if (err.errors[0].validatorKey == `not_unique`){
                                 return res.status(500).json({ message: `Le pseudo choisi existe déjà. Merci d'en choisir un autre.` });

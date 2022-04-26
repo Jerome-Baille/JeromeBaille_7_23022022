@@ -28,6 +28,7 @@ export class ProfileUpdateComponent implements OnInit {
 
   // Info variables (success, error, loading)
   infoBox: any = {};
+  newAvatar!: any;
 
   // FontAwesome Icons
   faPaperclip = faPaperclip;
@@ -42,9 +43,9 @@ export class ProfileUpdateComponent implements OnInit {
 
   ngOnInit(): void {
       this.usersForm = this.formBuilder.group({
-      username: [null],
-      email: [null],
-      bio: [null],
+      username: [this.displayProfile.username? this.displayProfile.username : ''],
+      email: [this.displayProfile.email? this.displayProfile.email : ''],
+      bio: [this.displayProfile.bio? this.displayProfile.bio : ''],
       avatar: [null],
       password: [null]
     });
@@ -80,9 +81,20 @@ export class ProfileUpdateComponent implements OnInit {
 
     this.usersService.updateProfile(userId, username, email, bio, avatar)
     .subscribe({
-      next: (v) => this.infoBox = {'infoMsg' : v},
+      next: (v) => {
+        this.infoBox = {'infoMsg' : Object.values(v)[0]}
+        this.newAvatar = Object.values(v)[1].avatar
+      },
       error: (e) => this.infoBox = {'errorMsg' : e.error.message},
-      complete: () => window.location.reload()  
+      complete: () => this.profileUpdated.emit({
+        message : 'profile updated', 
+        'infoMsg': this.infoBox.infoMsg, 
+        'errorMsg': this.infoBox.errorMsg,
+        'username': username,
+        'email': email,
+        'bio': bio,
+        'avatar': this.newAvatar
+      }) 
     });
 
     if(this.usersForm.value.password){
@@ -90,7 +102,11 @@ export class ProfileUpdateComponent implements OnInit {
     .subscribe({
       next: (v) => this.infoBox = {'infoMsg' : v},
       error: (e) => this.infoBox = {'errorMsg' : e.error.message},
-      complete: () => this.profileUpdated.emit({message : 'post updated', 'info': this.infoBox.infoMsg, 'error': this.infoBox.errorMsg})
+      complete: () => this.profileUpdated.emit({
+        message : 'profile updated', 
+        'infoMsg': this.infoBox.infoMsg, 
+        'errorMsg': this.infoBox.errorMsg
+      })
     })
     }
   }
@@ -101,7 +117,7 @@ export class ProfileUpdateComponent implements OnInit {
     .subscribe({
       next: (v) => this.infoBox = {'infoMsg' : v},
       error: (e) => this.infoBox = {'errorMsg' : e.error.message},
-      complete: () => console.info('complete')
+      complete: () => this.profileUpdated.emit({message : 'profile updated', 'infoMsg': this.infoBox.infoMsg, 'errorMsg': this.infoBox.errorMsg})
     })
   }
 }

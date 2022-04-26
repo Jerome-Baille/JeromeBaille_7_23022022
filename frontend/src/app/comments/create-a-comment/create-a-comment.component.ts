@@ -14,7 +14,7 @@ import { PostsService } from '../../services/posts.service';
 export class CreateACommentComponent implements OnInit {
   // Infos sent to the parent component
   @Output() 
-  comCreated: EventEmitter<string> = new EventEmitter<string>();
+  comCreated: EventEmitter<any> = new EventEmitter<any>();
 
   // Get post infos from parent component
   @Input() post!: any;
@@ -83,7 +83,7 @@ export class CreateACommentComponent implements OnInit {
         })
       },
       error: (e) => this.infoBox = {'errorMsg' : e.error.message},
-      complete: () => this.comCreated.emit()
+      complete: () => this.comCreated.emit({message : 'create a comment'})
     })
   }
 }

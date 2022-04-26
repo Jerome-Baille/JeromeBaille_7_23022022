@@ -270,9 +270,9 @@ export class PostComponent implements OnInit {
   onReportPost() {
     this.postsService.reportAPost(this.post.id)
     .subscribe({
-      next: (v) => console.log(v),
-      error: (e) => console.error(e),
-      complete: () => this.router.navigate(['/wall'])
+      next: (v) => this.infoBox = {'infoMsg' : Object.values(v)},
+      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      complete: () => this.ngOnInit()
     })
   }
 
@@ -280,9 +280,9 @@ export class PostComponent implements OnInit {
   onUnreportPost() {
     this.postsService.unreportAPost(this.post.id)
     .subscribe({
-      next: (v) => console.log(v),
-      error: (e) => console.error(e),
-      complete: () => window.location.reload()
+      next: (v) => this.infoBox = {'infoMsg' : Object.values(v)},
+      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      complete: () => this.ngOnInit()
     })
   }
 
@@ -315,15 +315,14 @@ export class PostComponent implements OnInit {
     return response;
   }
 
-  triggeredFromChild(eventData: any) {
-    this.loadCreateComment = false;
-    this.tempTotalCom = this.post.Comments.length +1;
-  }
-
   triggeredFromChildren(eventData: any) {
     if(eventData.message == 'post updated') {
       this.ngOnInit();
+      this.loadEditPost = false;
       this.infoBox = {'infoMsg' : eventData.info, 'errorMsg' : eventData.error}
+    } else if (eventData.message == 'create a comment') {
+      this.loadCreateComment = false;
+      this.tempTotalCom = this.post.Comments.length +1;
     }
   }
 }

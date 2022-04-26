@@ -23,8 +23,7 @@ export class ProfileComponent implements OnInit {
   userPosts: any = [];
 
   // Info variables (success, error, loading)
-  errorMsg: string = "";
-  infoMsg: any = "";
+  infoBox: any = {};
   loading: boolean = true;
 
   // Variables to load child components
@@ -190,5 +189,18 @@ export class ProfileComponent implements OnInit {
       error: (e) => console.error(e),
       complete: () => window.location.reload()
     })
+  }
+
+  triggeredFromChildren(eventData: any) {
+    if(eventData.message == 'profile updated') {
+      this.loadEditProfile = !this.loadEditProfile;
+      this.ngOnInit();
+      this.infoBox = {'infoMsg' : eventData.infoMsg, 'errorMsg' : eventData.errorMsg};
+
+      (eventData.username!= null)? this.displayProfile.username = eventData.username : null;
+      (eventData.email!= null)? this.displayProfile.email = eventData.email : null;
+      (eventData.bio!= null)? this.displayProfile.bio = eventData.bio : null;
+      (eventData.avatar!= null)? this.displayProfile.avatar = eventData.avatar : null;
+    }
   }
 }
