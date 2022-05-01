@@ -43,20 +43,15 @@ export class CreateAPostComponent implements OnInit {
 
   ngOnInit(): void {
     // Get current user id and role (admin or not)
-    this.userId = this.authService.getUserId();
-
-    if (isNaN(this.userId)) {
-      this.authService.checkIsAuth()
-      .subscribe({
-        next: (v) => {
-          this.isAuth = v
-          this.userId = this.isAuth.userId;
-
-          this.getUserInfos(this.userId);
-        },
-        error: (e) => this.isAuth = null,
+    this.authService.checkIsAuth()
+    .then((v) => {
+        this.isAuth = v
+        this.userId = this.isAuth.userId;
+        this.isAdmin = this.isAuth.isAdmin;
       })
-    }
+    .catch((e) => {
+        this.isAuth = null
+    })
 
     this.postForm = this.formBuilder.group({
       title: [null],

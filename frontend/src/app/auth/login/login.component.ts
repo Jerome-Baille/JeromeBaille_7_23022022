@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCircleCheck, faCircleXmark, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -22,6 +22,11 @@ export class LoginComponent implements OnInit {
   // Info variables (success, error, loading)
   infoBox: any = {};
   loading: boolean = true;
+  visiblePassword: boolean = false;
+
+  // FontAwesome icons
+  faEye = faEye;
+  faEyeSlash = faEyeSlash;
 
   constructor(private authService: AuthService,
               private formBuilder: FormBuilder,
@@ -31,21 +36,17 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
 
-    // Get current user id and role (admin or not)
-    this.userId = this.authService.getUserId();
-    this.isAdmin = this.authService.checkIsAdmin();
-
-    if (isNaN(this.userId)) {
-      this.authService.checkIsAuth()
-      .subscribe({
-        next: (v) => {
-          this.isAuth = v
-          this.userId = this.isAuth.userId;
-          this.isAdmin = this.isAuth.isAdmin;  
-        },
-        error: (e) => this.isAuth = null,
+    this.authService.checkIsAuth()
+    .then((v) => {
+        this.isAuth = v
+        this.userId = this.isAuth.userId;
+        this.isAdmin = this.isAuth.isAdmin;
+        this.loading = false;
       })
-    }
+    .catch((e) => {
+        this.isAuth = null
+        this.loading = false;
+    })
 
     // Set email regex
     this.emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -65,6 +66,7 @@ export class LoginComponent implements OnInit {
     this.authService.login(email, password)
     .then(() => {
       window.location.href="/wall";
+      // this.router.navigateByUrl('wall');
     })
     .catch((error) => {
       this.infoBox = {'errorMsg' : error.error.message}
@@ -79,5 +81,10 @@ export class LoginComponent implements OnInit {
       error: (e) =>  this.infoBox = {'errorMsg' : e.error.message},
       complete: () => window.location.reload()   
     })
+  }
+
+  // Show/hide the typed password
+  toggleVisibility() {
+    this.visiblePassword = !this.visiblePassword;
   }
 }

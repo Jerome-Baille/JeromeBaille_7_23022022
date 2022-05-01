@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { UsersService } from '../services/users.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -24,28 +23,17 @@ export class LandingPageComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
 
-    // Get current user id and role (admin or not)
-    this.userId = this.authService.getUserId();
-    this.isAdmin = this.authService.checkIsAdmin();
-
-    if (isNaN(this.userId)) {
-      this.authService.checkIsAuth()
-      .subscribe({
-        next: (v) => {
-          this.isAuth = v
-          this.userId = this.isAuth.userId;
-          this.isAdmin = this.isAuth.isAdmin;  
-        },
-        error: (e) => {
-          if(e.status === 403) {
-            console.log('403 Forbidden');
-            this.loading = false
-          }
-          this.isAuth = null
-        },
-        complete: () => this.loading = false
+    this.authService.checkIsAuth()
+    .then((v) => {
+        this.isAuth = v
+        this.userId = this.isAuth.userId;
+        this.isAdmin = this.isAuth.isAdmin;
+        this.loading = false;
       })
-    }
+    .catch((e) => {
+        this.isAuth = null
+        this.loading = false;
+    })
   }
 
   onContinue(): void {

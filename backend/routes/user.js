@@ -12,6 +12,7 @@ const userCtrl  = require('../controllers/userCtrl');
 // Routes
 router.post     ('/register',           multer, userCtrl.register);
 router.post     ('/login',                      userCtrl.login);
+router.post     ('/refreshToken',               userCtrl.refreshToken);
 
 router.get      ('/logout',       auth,         userCtrl.logout);
 

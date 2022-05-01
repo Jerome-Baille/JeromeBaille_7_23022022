@@ -299,7 +299,7 @@ exports.reportPost = (req, res, next) => {
         .then(() => res.status(200).json({ message: `Le post a été signalé avec succès.` }))
         .catch((error) => res.status(400).json({ error }));
       } else {
-        return res.status(201).json({ message: `Le post a déjà été signalé.` });
+        return res.status(401).json({ message: `Le post a déjà été signalé.` });
       }
     })
     .catch(function(err) {
@@ -324,10 +324,10 @@ exports.unreportPost = (req, res, next) => {
           .then(() => res.status(200).json({ message: `Le signalement a été supprimé avec succès.` }))
           .catch((error) => res.status(400).json({ error }));
         } else {
-          return res.status(201).json({ message: `Le post n'est pas signalé.` });
+          return res.status(401).json({ message: `Le post n'est pas signalé.` });
         }
       } else {
-        return res.status(403).json({ message: `Vous n'êtes pas autorisé à effectuer cette action.` })
+        return res.status(401).json({ message: `Vous n'êtes pas autorisé à effectuer cette action.` })
       }
     })
     .catch(function(err) {

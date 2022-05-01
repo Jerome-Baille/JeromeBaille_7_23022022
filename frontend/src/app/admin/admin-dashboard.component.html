@@ -8,7 +8,7 @@
 
     <div class="dashboard-container__card">
       <div class="tab">
-        <input type="checkbox" id="chck1">
+        <input type="checkbox" id="chck1" (change)="loadUsers($event)">
         <label class="tab-label" for="chck1">
             <h2>Gestion des utilisateurs</h2>
             <p>Cliquez ici pour rechercher un utilisateur</p>
@@ -16,17 +16,28 @@
         <div class="tab-content">
           <form class="dashboard-container__card__form" [formGroup]="userForm">
             <div class="form-group">
-              <label for="select-user">Utilisateur </label>
-              <select  id="select-user" formControlName="users" (change)="valueChange($event)">
-                <option *ngFor="let user of users$ | async" [value]="user.id">
-                  {{ user.username }}
-                </option>
-              </select>
+              <label for="select-user" class="select-user__label">User : </label>
+              <input 
+                      list="user-list" 
+                      name="select-user" 
+                      id="select-user"
+                      class="select-user" 
+                      type="text"
+                      autocomplete="off" 
+                      formControlName="users"
+                      placeholder="Recherche par pseudo"
+                      (change)="getSelectedUser($event)">
+              <datalist id="user-list">
+                <option *ngFor="let user of users" [attr.data-value]="user.id">
+                  {{user.username}}
+              </datalist>
             </div>
 
             <button class="btn" type="submit" (click)="onSubmitForm()" [disabled]="userForm.invalid">Submit</button>
           </form>         
     
+          <app-info-box *ngIf="userInfoBox" [infoBox]="infoBox"></app-info-box>
+
           <div class="selected-user" *ngIf="displayProfile!= 0">
             <app-profile *ngIf="displayProfile" [displayProfile]="displayProfile"></app-profile>
           </div>

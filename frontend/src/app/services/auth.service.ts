@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, map, Observable, of } from 'rxjs';
+import { Router } from '@angular/router';
+import { catchError, map, Observable, of, share } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,10 @@ export class AuthService {
   userId!: any;
   isAdmin!: boolean;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router
+    ) {}
 
 // Authentification
 
@@ -37,7 +41,6 @@ export class AuthService {
           }
         })
     })
-    
   }
 
   // Logout
@@ -59,10 +62,47 @@ export class AuthService {
 
   // Check if the user is authenticated
   checkIsAuth(){
-    return this.http.get('http://localhost:3000/api/users/isAuth', {withCredentials: true})
+    return new Promise((resolve, reject) => {
+      // if(isNaN(this.userId)) {
+        this.http.get('http://localhost:3000/api/users/isAuth', {withCredentials: true})
+        .subscribe({
+          next: (v) => {
+            this.isAuth = v;
+            this.userId = this.isAuth.userId;
+            this.isAdmin = this.isAuth.isAdmin;
+            resolve(v)
+          },
+          error: (err) => {
+            reject(err)
+          }
+        })
+      // } else {
+      //   resolve({
+      //     message : 'User already logged in',
+      //     userId: this.userId,
+      //     isAdmin: this.isAdmin
+      //   })
+      // }
+    })
+  }
 
-    // if return 403, token is not found
-    // if return 200, then the user is authenticated
-    // if return 401, then the user is not authenticated
+  // Refresh token
+  refreshToken(){
+    // return new Promise((resolve, reject) => {
+       return this.http.post('http://localhost:3000/api/users/refreshToken', {}, {withCredentials: true})
+    //     .subscribe({
+    //       next: (v) => {
+    //         this.isAuth = v;
+    //         this.userId = this.isAuth.userId;
+    //         this.isAdmin = this.isAuth.isAdmin;
+    //         resolve(v)
+    //       },
+    //       error: (err) => {
+    //         this.isAuth = null
+    //         reject(err)
+    //       },
+    //       // complete: () => location.reload()
+    //     })
+    // })
   }
 }

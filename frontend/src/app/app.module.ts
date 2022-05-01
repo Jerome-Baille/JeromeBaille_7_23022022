@@ -13,7 +13,7 @@ import { SinglePostComponent } from './wall/single-post/single-post.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { LoginComponent } from './auth/login/login.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ProfileComponent } from './profile/profile.component';
 import { ProfileUpdateComponent } from './profile-update/profile-update.component';
 import { CreateAPostComponent } from './wall/create-a-post/create-a-post.component';
@@ -26,6 +26,7 @@ import { AdminDashboardComponent } from './admin/admin-dashboard.component';
 import { MostPopularComponent } from './wall/most-popular/most-popular.component';
 import { LoadingComponent } from './loading/loading.component';
 import { InfoBoxComponent } from './info-box/info-box.component';
+import { AuthGuardInterceptor } from './auth-guard.interceptor';
 
 @NgModule({
   declarations: [
@@ -57,7 +58,8 @@ import { InfoBoxComponent } from './info-box/info-box.component';
     FontAwesomeModule
   ],
   providers: [
-    { provide: LOCALE_ID, useValue: 'fr-FR'}
+    { provide: LOCALE_ID, useValue: 'fr-FR'},
+    { provide: HTTP_INTERCEPTORS, useClass: AuthGuardInterceptor, multi: true}
   ],
   bootstrap: [AppComponent]
 })

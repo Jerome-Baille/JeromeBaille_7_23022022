@@ -35,25 +35,15 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     // Get current user id and role (admin or not)
-    this.userId = this.authService.getUserId();
-    this.isAdmin = this.authService.checkIsAdmin();
-
-    if (isNaN(this.userId)) {
-      this.authService.checkIsAuth()
-      .subscribe({
-        next: (v) => {
-          this.isAuth = v
-          this.userId = this.isAuth.userId;
-          this.isAdmin = this.isAuth.isAdmin;  
-        },
-        error: (e) => {
-          if(e.status === 403) {
-            console.log('403 Forbidden');
-          }
-          this.isAuth = null
-        },
+    this.authService.checkIsAuth()
+    .then((v) => {
+        this.isAuth = v
+        this.userId = this.isAuth.userId;
+        this.isAdmin = this.isAuth.isAdmin;
       })
-    }
+    .catch((e) => {
+        this.isAuth = null
+    })
   }
 
   // Toggle menu for mobile display

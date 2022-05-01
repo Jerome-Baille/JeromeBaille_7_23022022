@@ -103,21 +103,31 @@ exports.login = (req, res, next) => {
           if (!valid) {
             return res.status(401).json({message : `Le mot de passe renseigné est incorrect.` });
           }
-          const token = jwt.sign({
+          const accessToken = jwt.sign({
                 userId: userFound.id,
                 isAdmin: userFound.isAdmin
             },
-            process.env.TOKEN,
-            { expiresIn: '14d' }
+            process.env.ACCESS_TOKEN,
+            { expiresIn: '30s' }
             );
+
+          const refreshToken = jwt.sign({
+                userId: userFound.id,
+                isAdmin: userFound.isAdmin
+            },
+            process.env.REFRESH_TOKEN,
+            { expiresIn: '30d' }
+            );
+
             return res
-                .cookie('jwt', token /*, {httpOnly: true}*/)
+                .cookie('accessToken', accessToken /*, {httpOnly: true}*/)
+                .cookie('refreshToken', refreshToken)
                 .status(200)
                 .json({
                     message: 'Vous êtes connecté',
                     'userId': userFound.id,
                     'isAdmin': userFound.isAdmin,
-                    'token': token
+                    'accessToken': accessToken
                 })
         })
         .catch(error => res.status(500).json({ error }));
@@ -127,10 +137,44 @@ exports.login = (req, res, next) => {
     });
 };
 
+// Generate a new access token with a refresh token
+exports.refreshToken = (req, res, next) => {
+    // Params
+    const refreshToken = req.cookies.refreshToken;  // The refresh token sent by the client
+
+    if (refreshToken == null) {
+        return res.status(400).json({message: `Veuillez renseigner le champ 'refreshToken'`});
+    }
+
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN, function(err, decoded) {
+        if (err) {
+            return res.status(401).json({message: `Le token de réactualisation est invalide.`});
+        }
+        const accessToken = jwt.sign({
+            userId: decoded.userId,
+            isAdmin: decoded.isAdmin
+        },
+        process.env.ACCESS_TOKEN,
+        { expiresIn: '30s' }
+        );
+
+        return res
+            .cookie('accessToken', accessToken)
+            .status(200)
+            .json({
+                message: 'Vous êtes connecté',
+                'userId': decoded.userId,
+                'isAdmin': decoded.isAdmin,
+                'accessToken': accessToken
+            })
+    });
+};
+
 // Logout
 exports.logout = (req, res, next) => {
     return res
-        .clearCookie("jwt", {domain: 'localhost', path: '/'})
+        .clearCookie("accessToken", {domain: 'localhost', path: '/'})
+        .clearCookie("refreshToken", {domain: 'localhost', path: '/'})
         .status(200)
         .json({message : `Compte déconnecté avec succès`});
 };

@@ -1,26 +1,30 @@
-<div *ngIf="userId; else denied">
-    <div class="wall-container">
-        <!-- Back to the top button -->
-        <button (click)="scrollToTop()" id="myBtn" title="Go to top" [ngClass]="{ 'show-scrollTop': windowScrolled }">
-            <fa-icon [icon]="faRocket" class="rocket"></fa-icon>
-        </button>
-        <main>
-            <div>
-                <app-create-a-post></app-create-a-post>
-            </div>
-            
-            <app-post *ngFor="let post of posts" [post]="post"></app-post>   
-        </main>
-        <aside>
-            <h2>
-                Tendances 
-                <fa-icon [icon]="faArrowTrendUp"></fa-icon>
-            </h2>
-            <app-most-popular *ngFor="let post of topPosts" [post]="post"></app-most-popular>  
-        </aside>
-    </div>
-</div>
+<app-loading *ngIf="loading; else loaded"></app-loading>
 
+<ng-template #loaded>
+    <div *ngIf="userId; else denied">
+        <div class="wall-container">
+            <!-- Back to the top button -->
+            <button (click)="scrollToTop()" id="myBtn" title="Go to top" [ngClass]="{ 'show-scrollTop': windowScrolled }">
+                <fa-icon [icon]="faRocket" class="rocket"></fa-icon>
+            </button>
+            <main>
+                <div>
+                    <app-create-a-post></app-create-a-post>
+                </div>
+                
+                <app-post *ngFor="let post of posts" [post]="post"></app-post>   
+            </main>
+            <aside>
+                
+                <h2>
+                    Tendances 
+                    <fa-icon [icon]="faArrowTrendUp"></fa-icon>
+                </h2>
+                <app-most-popular *ngFor="let post of topPosts" [post]="post"></app-most-popular>  
+            </aside>
+        </div>
+    </div>
+</ng-template>
 
 <ng-template #denied>
     <div class="card card--denied">

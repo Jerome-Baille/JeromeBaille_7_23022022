@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -16,6 +17,11 @@ export class RegisterComponent implements OnInit {
   // Info variables (success, error, loading)
   infoBox: any = {};
   loading: boolean = true;
+  visiblePassword: boolean = false;
+
+  // FontAwesome icons
+  faEye = faEye;
+  faEyeSlash = faEyeSlash;
 
   constructor(private AuthService: AuthService,
               private formBuilder: FormBuilder,
@@ -53,4 +59,8 @@ export class RegisterComponent implements OnInit {
     })
   }
 
+  // Show/hide the typed password
+  toggleVisibility() {
+    this.visiblePassword = !this.visiblePassword;
+  }
 }

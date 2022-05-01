@@ -1,9 +1,8 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { faArrowTrendUp, faRocket } from '@fortawesome/free-solid-svg-icons';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
-import { Post } from '../../models/blog.model';
 import { PostsService } from '../../services/posts.service';
 
 @Component({
@@ -22,6 +21,9 @@ export class PostListComponent implements OnInit {
   posts!: any;
   loadedPosts: number = 0;
 
+  // Info variables (loading)
+  loading: boolean = true;
+
   windowScrolled = false;
 
   // FontAwesome Icons
@@ -34,38 +36,38 @@ export class PostListComponent implements OnInit {
     private router: Router) {}
 
   ngOnInit(): void {
-    // Get current user id and role (admin or not)
-    this.userId = this.authService.getUserId();
-    this.isAdmin = this.authService.checkIsAdmin();
+    this.loading = true;
 
-    if (isNaN(this.userId)) {
-      this.authService.checkIsAuth()
-      .subscribe({
-        next: (v) => {
-          this.isAuth = v
-          this.userId = this.isAuth.userId;
-          this.isAdmin = this.isAuth.isAdmin;  
-        },
-        error: (e) => this.isAuth = null,
+    // Get current user id and role (admin or not)
+    this.authService.checkIsAuth()
+    .then((v) => {
+        this.isAuth = v
+        this.userId = this.isAuth.userId;
+        this.isAdmin = this.isAuth.isAdmin;
       })
-    }
+    .then(() => {
+      // remove from local storage all keys starting with post-
+      var keys = Object.keys(localStorage).filter(k => k.startsWith('post-'));
+      keys.forEach(k => localStorage.removeItem(k));
+    })
+    .then(() => {
+      // Load 5 posts and top posts
+      this.loadPosts();
+      this.loadTop5();
+      this.loading = false;
+    })
+    .catch((e) => {
+        this.isAuth = null
+    })
 
     window.addEventListener('scroll', () => {
       this.windowScrolled = window.pageYOffset !== 0;
     });
-
-    // remove from local storage all keys starting with post-
-    var keys = Object.keys(localStorage).filter(k => k.startsWith('post-'));
-    keys.forEach(k => localStorage.removeItem(k));
-
-    // Load 5 posts and top posts
-    this.loadPosts();
-    this.loadTop5();
   }
 
   // Get 5 posts
   loadPosts() {
-    var fields = 'id,content,attachment,isActive,points,createdAt,updatedAt';
+    var fields = 'id,content,attachment,isSignaled,points,createdAt,updatedAt';
     var limit = '5';
     var offset = '*';
     var order = 'createdAt:DESC';
@@ -81,20 +83,15 @@ export class PostListComponent implements OnInit {
 
   // Get the 5 most liked posts
   loadTop5() {
-    var fields = '*';
-    var limit = '*';
+    var fields = 'id,content,attachment,isActive,points,createdAt,updatedAt';
+    var limit = '5';
     var offset = '*';
-    var order = '*';
+    var order = 'points:DESC';
 
     this.postsService.getAllPosts(fields, limit, offset, order)
-      .pipe(
-        map(posts => 
-          posts.sort((a, b) => b.points - a.points)
-          )
-      )
       .subscribe({
         next: (v) => {
-          this.topPosts = v.slice(0, 5)
+          this.topPosts = v;
         },
         error: (e) => console.error(e),
       })
@@ -118,7 +115,7 @@ export class PostListComponent implements OnInit {
             console.log('loading more posts')
             }
           },
-          error: (e) => console.error(e),
+          error: (e) => console.log(e),
         })
     }
   }

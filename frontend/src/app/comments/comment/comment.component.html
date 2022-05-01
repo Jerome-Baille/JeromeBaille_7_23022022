@@ -12,14 +12,15 @@
             </p>  
         </section>
 
-
-        <p class="container--comment__content">
-                    {{ com.content }}
-                </p>
-        <div class="container--comment__attachment">
-            <img *ngIf="com.attachment" [src]="com.attachment" alt="">
-        </div>
-        
+        <a class="card__link" routerLink="/wall/{{com.postId}}">
+            <p class="container--comment__content">
+                        {{ com.content }}
+                    </p>
+            <div class="container--comment__attachment">
+                <img *ngIf="com.attachment" [src]="com.attachment" alt="">
+            </div>
+        </a>
+            
         <div class="container--comment__btn">
             <div class="points__container">
                 <button [ngStyle]="(findRightUser() =='like')? {'color':'green'} : {} " id="likeCom-{{ com.id }}" type="submit" (click)="onLikeComment()">

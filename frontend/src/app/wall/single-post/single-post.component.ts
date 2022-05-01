@@ -62,28 +62,26 @@ export class SinglePostComponent implements OnInit {
     this.loading = true;
     
     // Get current user id and role (admin or not)
-    this.userId = this.authService.getUserId();
-    this.isAdmin = this.authService.checkIsAdmin();
-
-    if (isNaN(this.userId)) {
-      this.authService.checkIsAuth()
-      .subscribe({
-        next: (v) => {
-          this.isAuth = v
-          this.userId = this.isAuth.userId;
-          this.isAdmin = this.isAuth.isAdmin;  
-        },
-        error: (e) => this.isAuth = null,
+    this.authService.checkIsAuth()
+    .then((v) => {
+        this.isAuth = v
+        this.userId = this.isAuth.userId;
+        this.isAdmin = this.isAuth.isAdmin;
       })
-    }
-    
-    const postId = +this.route.snapshot.params['id'];
+    .then(() => {
+      // Get the post
+      const postId = +this.route.snapshot.params['id'];
 
-    this.postsService.getOnePost(postId)
-    .subscribe({
-      next: (v) => this.post = v,
-      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
-      complete: () => this.loading = false
+      this.postsService.getOnePost(postId)
+      .subscribe({
+        next: (v) => this.post = v,
+        error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+        complete: () => this.loading = false
+      })
+    })
+    .catch((e) => {
+        this.isAuth = null
+        this.loading = false;
     })
   }
 
@@ -176,6 +174,8 @@ export class SinglePostComponent implements OnInit {
     .subscribe({
       next: (v) =>{
         this.infoBox = {'infoMsg' : Object.values(v)}
+        
+        this.post.isSignaled = true;
       },
       error: (e) => {
         this.infoBox = {'errorMsg' : e.error.message}
@@ -190,6 +190,7 @@ export class SinglePostComponent implements OnInit {
     .subscribe({
       next: (v) => {
         this.infoBox = {'infoMsg' : Object.values(v)}
+        this.post.isSignaled = false;
       },
       error: (e) => {
         this.infoBox = {'errorMsg' : e.error.message}

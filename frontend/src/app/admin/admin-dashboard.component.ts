@@ -22,11 +22,13 @@ export class AdminDashboardComponent implements OnInit {
 
   // Form variables
   userForm!: FormGroup;
-  selected!: number;
+  selected: any = null;
+
+  myUser!: any;
 
   // Info variables (success, error, loading)
-  errorMsg: string = "";
-  infoMsg: any = "";
+  infoBox: any = {};
+  userInfoBox: boolean = false;
   loading: boolean = true;
 
   // Variables to load child components
@@ -38,6 +40,8 @@ export class AdminDashboardComponent implements OnInit {
   displayProfile: any = [];
   posts$!: Observable<Post[]>;
   comments$!: Observable<Comment[]>;
+
+  users: any = [];
 
   // FontAwesome icons
   faHeart = faHeart;
@@ -61,36 +65,29 @@ export class AdminDashboardComponent implements OnInit {
     this.loading = true;
 
     // Get current user id and role (admin or not)
-    this.userId = this.authService.getUserId();
-    this.isAdmin = this.authService.checkIsAdmin();
-
-    if (isNaN(this.userId)) {
-      this.authService.checkIsAuth()
-      .subscribe({
-        next: (v) => {
-          this.isAuth = v
-          this.userId = this.isAuth.userId;
-          this.isAdmin = this.isAuth.isAdmin;  
-        },
-        error: (e) => this.isAuth = null,
+    this.authService.checkIsAuth()
+    .then((v) => {
+        this.isAuth = v
+        this.userId = this.isAuth.userId;
+        this.isAdmin = this.isAuth.isAdmin;
       })
-    }
+    .then(() => {
+      // Get all the reported posts
+      this.posts$ = this.postsService.getReportedPosts();
 
-    // Get users information
-    this.users$ = this.usersService.getAllUsers();
+      // Get all the reported comments
+      this.comments$ = this.commentsService.getReportedComments();
 
-    // Get all the reported posts
-    this.posts$ = this.postsService.getReportedPosts();
-
-    // Get all the reported comments
-    this.comments$ = this.commentsService.getReportedComments();
-
-    // Form to select user profile
-    this.userForm = this.formBuilder.group({
-      users: [null, Validators.required],
+      // Form to select user profile
+      this.userForm = this.formBuilder.group({
+        users: [null, Validators.required],
+      })
     })
-
-    this.loading = false;
+    .then(() => this.loading = false)
+    .catch((e) => {
+        this.isAuth = null
+        // this.loading = false;
+    })
   }
 
   // On click, loads/unloads the different child components (edit profile, edit posts)
@@ -108,18 +105,70 @@ export class AdminDashboardComponent implements OnInit {
       this.selected = event.target.value;
     }
 
+    getSelectedUser(e: any) {
+      var input = e.target,
+          list = input.getAttribute('list'),
+          options = document.querySelectorAll('#' + list + ' option'),
+          label = input.value;
+  
+      for(var i = 0; i < options.length; i++) {
+          var option = options[i];
+  
+          if(option.innerHTML == ` ${label} ` ) {
+            this.selected = parseInt(option.getAttribute('data-value')!);
+            break;
+          } else {
+            this.selected = null;
+          }
+      }
+   }
+
     // On submit, get the selected user profile
     onSubmitForm() {
-      var userId = this.selected;
-      this.usersService.getOneUser(userId)
-      .subscribe({
-        next: (v) => this.displayProfile = v,
-        error: (e) => console.error(e)
-      })
+      this.userForm.reset();
+      this.userInfoBox = false;
+      
+      if (this.selected === null) {
+        this.userInfoBox = true;
+        this.infoBox = {'errorMsg' : `Aucun utilisateur n'a été trouvé`}
+        this.displayProfile = [];
+
+      } else {
+        var userId = this.selected;
+        this.usersService.getOneUser(userId)
+        .subscribe({
+          next: (v) => this.displayProfile = v,
+          error: (e) => {
+            this.userInfoBox = true;
+            this.infoBox = {'errorMsg' : e.error.message}
+          }
+        })
+      }
     }
 
   // If the user is not logged in, redirect to the login page
   onToLogin(): void {
     this.router.navigateByUrl('login');
   }
+
+  loadUsers(e: any) {
+    if(e.target.checked){  
+      // Get users information
+      this.usersService.getAllUsers()
+      .subscribe({
+        next: (v) => {
+          this.users = v
+        },
+        error: (e) => {
+          if (e.status === 418) {
+            console.log('Teapot is in da place')
+          }
+        }
+      })
+    } else {
+      this.displayProfile = [];
+    }
+ }
+
+
 }

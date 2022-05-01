@@ -23,7 +23,7 @@
             </header>
             <div id="body" class="main__content">
                 <div class="main__content__container main__content__container--col">
-                    <a class="card__link" routerLink="{{post.id}}">
+                    <a class="card__link" routerLink="/wall/{{post.id}}">
                         <p *ngIf="post.title" class="main__content__container__text main__content__container__text--center">{{ post.title }}</p>
                         <img class="main__content__container__img"  *ngIf="post.attachment" [src]="post.attachment" alt="{{ post.attachment }}">
                         <div *ngIf="post.content">
@@ -95,13 +95,15 @@
                 
                 <button class="btn--small" (click)="loadChildComponent('loadCreateComment')">Commenter le post</button>
             </footer>
+            <app-info-box [infoBox]="infoBox"></app-info-box>
+            
                 <app-create-a-comment *ngIf="loadCreateComment" [post]="post" (comCreated)="triggeredFromChildren($event)"></app-create-a-comment>
 
                 <div *ngIf="loadComments" class="main__comments-container">
                     <app-comment *ngFor="let comment of comments" [com]="comment" class="main__comments-container__cards"></app-comment>
                 </div>
 
-                <app-info-box [infoBox]="infoBox"></app-info-box>
+
         </main>
     </div>
 </ng-template>

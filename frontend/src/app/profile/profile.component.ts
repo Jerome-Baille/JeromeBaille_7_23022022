@@ -51,20 +51,15 @@ export class ProfileComponent implements OnInit {
     this.loading = true;
 
     // Get current user id and role (admin or not)
-    this.userId = this.authService.getUserId();
-    this.isAdmin = this.authService.checkIsAdmin();
-
-    if (isNaN(this.userId)) {
-      this.authService.checkIsAuth()
-      .subscribe({
-        next: (v) => {
-          this.isAuth = v
-          this.userId = this.isAuth.userId;
-          this.isAdmin = this.isAuth.isAdmin;  
-        },
-        error: (e) => this.isAuth = null,
+    this.authService.checkIsAuth()
+    .then((v) => {
+        this.isAuth = v
+        this.userId = this.isAuth.userId;
+        this.isAdmin = this.isAuth.isAdmin;
       })
-    }
+    .catch((e) => {
+        this.isAuth = null
+    })
 
     // Load user's info 
     if(this.displayProfile && this.displayProfile.length== 0){

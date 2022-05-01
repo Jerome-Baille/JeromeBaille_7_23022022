@@ -16,7 +16,7 @@
     }
 
     &--single {
-        margin: 2rem;
+        margin: 2rem auto !important;
 
         &__auth {
           width: 50%;
@@ -140,6 +140,34 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+
+        @include mobile {
+          & input {
+            width: 100% !important;
+          }
+          & label {
+            display: none;
+          }
+          &__buttons {
+            & button {
+              width: 80% !important;
+            }
+          }
+        }
+
+
+        &--password-container {
+          position: relative;
+        }
+
+        & .passwordEyeIcon {
+          position: absolute;
+          right: 0;
+          padding-right: 2px;
+          z-index: 999;
+
+          @include flex-center
+        }
 
         &--create-post {
           margin: 0 !important;
@@ -418,6 +446,12 @@
           display: flex;
           justify-content: space-around;
           align-items: center;
+
+          @include mobile {
+            flex-direction: column;
+            height: auto;
+            row-gap: 5px;
+          }
 
           &--profile{
             margin: 0 1rem;

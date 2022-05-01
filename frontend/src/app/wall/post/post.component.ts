@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Comment, Post } from '../../models/blog.model';
+import { Post } from '../../models/blog.model';
 import { PostsService } from '../../services/posts.service';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
@@ -54,8 +54,6 @@ export class PostComponent implements OnInit {
   faChevronRight = faChevronRight;
   faThumbsUp = faThumbsUp;
 
-  likelyMe!: any;
-
 
   constructor(
     private postsService: PostsService,
@@ -66,24 +64,10 @@ export class PostComponent implements OnInit {
   ngOnInit() {
     this.loading = true;
 
-    // Get current user id and role (admin or not)
     this.userId = this.authService.getUserId();
     this.isAdmin = this.authService.checkIsAdmin();
 
-    if (isNaN(this.userId)) {
-      this.authService.checkIsAuth()
-      .subscribe({
-        next: (v) => {
-          this.isAuth = v
-          this.userId = this.isAuth.userId;
-          this.isAdmin = this.isAuth.isAdmin;  
-        },
-        error: (e) => this.isAuth = null,
-        complete: () => this.loading = false
-      })
-    } else {
-      this.loading = false;
-    }
+    this.loading = false;
   }
 
   // Deletes the post on submit
@@ -270,8 +254,15 @@ export class PostComponent implements OnInit {
   onReportPost() {
     this.postsService.reportAPost(this.post.id)
     .subscribe({
-      next: (v) => this.infoBox = {'infoMsg' : Object.values(v)},
-      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      next: (v) => {
+        this.infoBox = {'infoMsg' : Object.values(v)}
+
+        this.post.isSignaled = true;
+      },
+      error: (e) => {
+        this.infoBox = {'errorMsg' : e.error.message}
+        // this.ngOnInit();
+      },
       complete: () => this.ngOnInit()
     })
   }
@@ -280,8 +271,15 @@ export class PostComponent implements OnInit {
   onUnreportPost() {
     this.postsService.unreportAPost(this.post.id)
     .subscribe({
-      next: (v) => this.infoBox = {'infoMsg' : Object.values(v)},
-      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      next: (v) => {
+        this.infoBox = {'infoMsg' : Object.values(v)}
+
+        this.post.isSignaled = false;
+      },
+      error: (e) => {
+        this.infoBox = {'errorMsg' : e.error.message}
+        // this.ngOnInit()
+      },
       complete: () => this.ngOnInit()
     })
   }
