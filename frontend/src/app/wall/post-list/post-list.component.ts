@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { faArrowTrendUp, faRocket } from '@fortawesome/free-solid-svg-icons';
+import { faArrowTrendUp, faCircleXmark, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { map } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { PostsService } from '../../services/posts.service';
@@ -26,9 +26,13 @@ export class PostListComponent implements OnInit {
 
   windowScrolled = false;
 
+  searchText: string = '';
+  searchResult!: any;
+
   // FontAwesome Icons
   faRocket = faRocket;
   faArrowTrendUp = faArrowTrendUp;
+  faCircleXmark = faCircleXmark;
 
   constructor(
     private postsService: PostsService,
@@ -128,5 +132,9 @@ export class PostListComponent implements OnInit {
   // Scroll to the top of the page on click
   scrollToTop(): void {
     window.scrollTo(0, 0);
+  }
+
+  clearSearch() {
+    this.searchText = '';
   }
 }

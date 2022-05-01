@@ -11,11 +11,29 @@
                 <div>
                     <app-create-a-post></app-create-a-post>
                 </div>
+
+                <div class="nav__search">
+                    <input  type="text" 
+                            class="nav__search__input" 
+                            id="search-text" 
+                            aria-describedby="search-text" 
+                            [(ngModel)]="searchText" 
+                            placeholder="Rechercher un post..." 
+                            autofocus
+                    >
+                    <button class="nav__search__btn" (click)="clearSearch()">
+                        <fa-icon [icon]="faCircleXmark"></fa-icon>
+                    </button>
+                </div>
                 
-                <app-post *ngFor="let post of posts" [post]="post"></app-post>   
+                <app-post *ngFor="let post of posts | filter: searchText" [post]="post"></app-post>  
+                <div *ngIf="(posts | filter: searchText) && (posts | filter: searchText).length=== 0" class="card  card--denied">
+                    <h2>
+                        Aucun résultat pour cette recherche
+                    </h2>
+                </div> 
             </main>
             <aside>
-                
                 <h2>
                     Tendances 
                     <fa-icon [icon]="faArrowTrendUp"></fa-icon>

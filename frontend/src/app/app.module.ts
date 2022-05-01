@@ -12,7 +12,7 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
 import { SinglePostComponent } from './wall/single-post/single-post.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { LoginComponent } from './auth/login/login.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ProfileComponent } from './profile/profile.component';
 import { ProfileUpdateComponent } from './profile-update/profile-update.component';
@@ -27,6 +27,7 @@ import { MostPopularComponent } from './wall/most-popular/most-popular.component
 import { LoadingComponent } from './loading/loading.component';
 import { InfoBoxComponent } from './info-box/info-box.component';
 import { AuthGuardInterceptor } from './auth-guard.interceptor';
+import { FilterPipe } from './filter.pipe';
 
 @NgModule({
   declarations: [
@@ -49,13 +50,15 @@ import { AuthGuardInterceptor } from './auth-guard.interceptor';
     MostPopularComponent,
     LoadingComponent,
     InfoBoxComponent,
+    FilterPipe,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    FormsModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR'},

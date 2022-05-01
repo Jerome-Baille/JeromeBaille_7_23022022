@@ -17,6 +17,8 @@ export class HeaderComponent implements OnInit {
   // Toggle menu for mobile display
   toggle: boolean = false;
 
+  searchText: string = '';
+
   // fontawesome icons for mobile display menu
   faBars = faBars;
 

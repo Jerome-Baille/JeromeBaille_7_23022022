@@ -2,12 +2,9 @@
     <nav class="nav">
         <div class="nav__container">
             <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-                <img src="../../assets/icon-left-font-1.svg" alt="Logo de Groupomania" class="logo--large">
-                <img src="../../assets/icon.svg" alt="Logo de Groupomania" class="logo--small">
+                <img src="../../assets/icon-left-font-1.svg" alt="Logo de Groupomania">
             </a>
-    
-            <input type="text" class="nav__search" placeholder="Search..">
-    
+
             <button class="nav__list" (click)="onToggle()">
                 <fa-icon [icon]="faBars" class="nav__list--icon"></fa-icon>
             </button>
