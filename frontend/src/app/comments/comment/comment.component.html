@@ -4,7 +4,7 @@
     <div class="container--comment" id="com-{{ com.id }}">
         <section class="container--comment__header">
             <div>
-                <img class="container--comment__header__avatar" src="{{ com.User.avatar? com.User.avatar : '../../assets/default-profile-picture.jpg' }}" alt="{{ com.User.name }}">
+                <img class="container--comment__header__avatar" src="{{ com.User.avatar? com.User.avatar : '../../assets/default-profile-picture.jpg' }}" alt="{{ com.User.username }}">
             </div>
             <p>
                 <a class="main__header__user-link" routerLink="/profil/{{com.User.id}}">{{ com.User.username }}</a> 

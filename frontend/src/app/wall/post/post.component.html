@@ -103,7 +103,7 @@
                     <app-comment *ngFor="let comment of comments" [com]="comment" class="main__comments-container__cards"></app-comment>
                 </div>
 
-
+                <app-create-a-comment *ngIf="loadComments && !loadCreateComment" [post]="post" (comCreated)="triggeredFromChildren($event)"></app-create-a-comment>
         </main>
     </div>
 </ng-template>

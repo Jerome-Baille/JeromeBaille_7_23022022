@@ -237,6 +237,10 @@
         &__buttons {
           width: 100%;
           margin: 2rem auto;
+
+          &--create-com {
+            @include flex-center
+          }
         }
 
         &__alert-msg {

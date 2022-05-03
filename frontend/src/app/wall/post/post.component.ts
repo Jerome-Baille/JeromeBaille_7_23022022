@@ -175,6 +175,7 @@ export class PostComponent implements OnInit {
     } else if (src == "loadComments") {
       if(this.loadComments == false) {
         this.loadComments = !this.loadComments;
+        this.loadCreateComment = false;
 
         var storedCom = JSON.parse(localStorage.getItem(`post-${this.post.id}`)!);
 
