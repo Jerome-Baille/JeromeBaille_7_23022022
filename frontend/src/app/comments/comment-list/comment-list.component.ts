@@ -54,7 +54,7 @@ export class CommentListComponent implements OnInit {
 
   // Get 5 reported comments
   loadReportedComs() {
-    var fields = 'id,content,attachment,isSignaled,points,createdAt,updatedAt';
+    var fields = 'id,content,attachment,isSignaled,points,createdAt,updatedAt,postId';
     var limit = '5';
     var offset = '*';
     var order = 'createdAt:DESC';
@@ -69,7 +69,7 @@ export class CommentListComponent implements OnInit {
   }
 
   loadMoreReportedComs() {
-    var fields = 'id,content,attachment,isSignaled,points,createdAt,updatedAt';
+    var fields = 'id,content,attachment,isSignaled,points,createdAt,updatedAt,postId';
     var limit = '5';
     var offset = this.comments.length;
     var order = 'createdAt:DESC';
