@@ -23,6 +23,10 @@
           margin: 20px auto;
           padding: 10px 30px;
           text-align: center;
+
+          @include mobile {
+            width: 100%;
+          }
         }
     }
 
