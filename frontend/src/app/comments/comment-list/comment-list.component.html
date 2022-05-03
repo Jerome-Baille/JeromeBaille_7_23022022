@@ -1,0 +1,13 @@
+<app-loading *ngIf="loading; else loaded"></app-loading>
+
+<ng-template #loaded>
+    <app-comment *ngFor="let comment of comments" [com]="comment"></app-comment> 
+    <div class="button-container">
+        <button 
+                *ngIf="comments && totalComments && (comments.length<totalComments)" 
+                (click)="loadMoreReportedComs()"
+                class="btn">
+                Load more
+        </button>
+    </div>
+</ng-template>

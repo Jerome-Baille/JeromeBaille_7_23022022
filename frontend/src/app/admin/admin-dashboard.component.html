@@ -47,7 +47,7 @@
     </div>
 
     <div class="dashboard-container__card">
-      <div class="dashboard-container__card__empty" *ngIf="!(posts$ | async)?.length; else signaledMsg">
+      <div class="dashboard-container__card__empty" *ngIf="!posts.length; else signaledMsg">
         <h2>Gestion des messages signalés</h2>
         <p>Aucun message signalé</p>
       </div>
@@ -57,18 +57,18 @@
           <input type="checkbox" id="chck2">
           <label class="tab-label" for="chck2">
             <h2>Gestion des messages signalés</h2>
-            <p *ngIf="(posts$ | async)?.length == 1">Vous avez 1 message signalé, cliquez pour le voir.</p>
-            <p *ngIf="(posts$ | async)?.length != 1">Vous avez {{ (posts$ | async)?.length }} messages signalés, cliquez pour les voir</p>
+            <p *ngIf="posts.length == 1">Vous avez 1 message signalé, cliquez pour le voir.</p>
+            <p *ngIf="posts.length != 1">Vous avez {{ posts.length }} messages signalés, cliquez pour les voir</p>
           </label>
           <div class="tab-content" >
-              <app-post class="reported-msg" *ngFor="let post of posts$ | async" [post]="post"></app-post>
+              <app-reported-post-list class="reported-msg" [totalPosts]="posts.length"></app-reported-post-list>
           </div>
         </div>
       </ng-template>
     </div>
     
     <div class="dashboard-container__card">
-      <div class="dashboard-container__card__empty" *ngIf="!(comments$ | async)?.length; else signaledCom">
+      <div class="dashboard-container__card__empty" *ngIf="!comments.length; else signaledCom">
         <h2>Gestion des messages signalés</h2>
         <p>Aucun message signalé</p>
       </div>
@@ -78,11 +78,11 @@
           <input type="checkbox" id="chck3">
           <label class="tab-label" for="chck3">
               <h2>Gestion des commentaires</h2>
-              <p *ngIf="(comments$ | async)?.length == 1">Vous avez 1 commentaire signalé, cliquez pour le voir.</p>
-              <p *ngIf="(comments$ | async)?.length != 1">Vous avez {{ (comments$ | async)?.length }} commentaires signalés, cliquez pour les voir</p>
+              <p *ngIf="comments.length == 1">Vous avez 1 commentaire signalé, cliquez pour le voir.</p>
+              <p *ngIf="comments.length != 1">Vous avez {{ comments.length }} commentaires signalés, cliquez pour les voir</p>
             </label>
           <div class="tab-content" >
-            <app-comment *ngFor="let comment of comments$ | async" [com]="comment"></app-comment>
+            <app-comment-list [totalComments]="comments.length"></app-comment-list>
           </div>
         </div>
       </ng-template>

@@ -1,0 +1,13 @@
+<app-loading *ngIf="loading; else loaded"></app-loading>
+
+<ng-template #loaded>
+    <app-post *ngFor="let post of posts" [post]="post"></app-post> 
+    <div class="button-container">
+        <button 
+                *ngIf="posts && totalPosts && (posts.length<totalPosts)" 
+                (click)="loadMoreReportedPosts()"
+                class="btn">
+                Load more
+        </button>
+    </div>
+</ng-template>

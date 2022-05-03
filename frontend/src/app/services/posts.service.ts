@@ -32,8 +32,8 @@ export class PostsService {
 
   }
 
-  getReportedPosts(): Observable<Post[]> {
-    return this.http.get<Post[]>('http://localhost:3000/api/posts/report/all', {withCredentials: true});
+  getReportedPosts(fields: string, limit: string, offset: any, order: string): Observable<Post[]> {
+    return this.http.get<Post[]>(`http://localhost:3000/api/posts/report/all?fields=${fields}&limit=${limit}&offset=${offset}&order=${order}`, {withCredentials: true});
   }
 
   // Update

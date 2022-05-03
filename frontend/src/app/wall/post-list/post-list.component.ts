@@ -19,7 +19,6 @@ export class PostListComponent implements OnInit {
   // Main data variables
   topPosts!: any;
   posts!: any;
-  loadedPosts: number = 0;
 
   // Info variables (loading)
   loading: boolean = true;
@@ -37,7 +36,8 @@ export class PostListComponent implements OnInit {
   constructor(
     private postsService: PostsService,
     private authService: AuthService,
-    private router: Router) {}
+    private router: Router
+    ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -62,6 +62,7 @@ export class PostListComponent implements OnInit {
     })
     .catch((e) => {
         this.isAuth = null
+        this.loading = false;
     })
 
     window.addEventListener('scroll', () => {

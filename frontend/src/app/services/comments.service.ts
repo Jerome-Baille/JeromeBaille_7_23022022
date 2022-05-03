@@ -31,8 +31,8 @@ export class CommentsService {
     return this.http.get<Comment>(`http://localhost:3000/api/comments/${commentId}`, {withCredentials: true});
   }
 
-  getReportedComments(): Observable<Comment[]> {
-    return this.http.get<Comment[]>('http://localhost:3000/api/comments/report/all', {withCredentials: true});
+  getReportedComments(fields: string, limit: string, offset: any, order: string): Observable<Comment[]> {
+    return this.http.get<Comment[]>(`http://localhost:3000/api/comments/report/all?fields=${fields}&limit=${limit}&offset=${offset}&order=${order}`, {withCredentials: true});
   }
 
   // Update

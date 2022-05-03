@@ -38,7 +38,8 @@ export class AdminDashboardComponent implements OnInit {
   // Main data
   users$!: Observable<User[]>;
   displayProfile: any = [];
-  posts$!: Observable<Post[]>;
+  posts: any = [];
+  comments : any = [];
   comments$!: Observable<Comment[]>;
 
   users: any = [];
@@ -73,10 +74,10 @@ export class AdminDashboardComponent implements OnInit {
       })
     .then(() => {
       // Get all the reported posts
-      this.posts$ = this.postsService.getReportedPosts();
+      this.loadPosts();
 
       // Get all the reported comments
-      this.comments$ = this.commentsService.getReportedComments();
+      this.loadComments();
 
       // Form to select user profile
       this.userForm = this.formBuilder.group({
@@ -97,6 +98,36 @@ export class AdminDashboardComponent implements OnInit {
     } else if (element === 'editProfile') {
       this.loadEditProfile = !this.loadEditProfile
     }
+  }
+
+  loadPosts() {
+    var fields = 'id,updatedAt';
+    var limit = '*';
+    var offset = '*';
+    var order = 'updatedAt:DESC';
+
+    this.postsService.getReportedPosts(fields, limit, offset, order)
+    .subscribe({
+      next: (v) => {
+        this.posts = v;
+      },
+      error: (e) => console.error(e),
+    })
+  }
+
+  loadComments() {
+    var fields = 'id,updatedAt';
+    var limit = '*';
+    var offset = '*';
+    var order = 'updatedAt:DESC';
+
+    this.commentsService.getReportedComments(fields, limit, offset, order)
+    .subscribe({
+      next: (v) => {
+        this.comments = v;
+      },
+      error: (e) => console.error(e),
+    })
   }
 
   // Form to select user profile
@@ -160,15 +191,11 @@ export class AdminDashboardComponent implements OnInit {
           this.users = v
         },
         error: (e) => {
-          if (e.status === 418) {
-            console.log('Teapot is in da place')
-          }
+          console.log(e)
         }
       })
     } else {
       this.displayProfile = [];
     }
  }
-
-
 }

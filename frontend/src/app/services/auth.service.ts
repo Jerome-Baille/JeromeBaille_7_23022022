@@ -63,7 +63,6 @@ export class AuthService {
   // Check if the user is authenticated
   checkIsAuth(){
     return new Promise((resolve, reject) => {
-      // if(isNaN(this.userId)) {
         this.http.get('http://localhost:3000/api/users/isAuth', {withCredentials: true})
         .subscribe({
           next: (v) => {
@@ -76,33 +75,11 @@ export class AuthService {
             reject(err)
           }
         })
-      // } else {
-      //   resolve({
-      //     message : 'User already logged in',
-      //     userId: this.userId,
-      //     isAdmin: this.isAdmin
-      //   })
-      // }
     })
   }
 
   // Refresh token
   refreshToken(){
-    // return new Promise((resolve, reject) => {
-       return this.http.post('http://localhost:3000/api/users/refreshToken', {}, {withCredentials: true})
-    //     .subscribe({
-    //       next: (v) => {
-    //         this.isAuth = v;
-    //         this.userId = this.isAuth.userId;
-    //         this.isAdmin = this.isAuth.isAdmin;
-    //         resolve(v)
-    //       },
-    //       error: (err) => {
-    //         this.isAuth = null
-    //         reject(err)
-    //       },
-    //       // complete: () => location.reload()
-    //     })
-    // })
+    return this.http.post('http://localhost:3000/api/users/refreshToken', {}, {withCredentials: true})
   }
 }

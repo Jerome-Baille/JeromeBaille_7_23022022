@@ -28,6 +28,8 @@ import { LoadingComponent } from './loading/loading.component';
 import { InfoBoxComponent } from './info-box/info-box.component';
 import { AuthGuardInterceptor } from './auth-guard.interceptor';
 import { FilterPipe } from './filter.pipe';
+import { ReportedPostListComponent } from './wall/reported-post-list/reported-post-list.component';
+import { CommentListComponent } from './comments/comment-list/comment-list.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +53,8 @@ import { FilterPipe } from './filter.pipe';
     LoadingComponent,
     InfoBoxComponent,
     FilterPipe,
+    ReportedPostListComponent,
+    CommentListComponent,
   ],
   imports: [
     BrowserModule,
