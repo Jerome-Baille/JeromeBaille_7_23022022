@@ -25,6 +25,8 @@ export class CreateAPostComponent implements OnInit {
   // Form variables
   selectedFile!: File;
   postForm!: FormGroup;
+  extentionRegEx!: RegExp;
+  errorType: boolean = false;
 
   // Info variables (success, error, loading)
   infoBox: any = {};
@@ -53,6 +55,9 @@ export class CreateAPostComponent implements OnInit {
         this.isAuth = null
     })
 
+    // Set extention RegEx
+    this.extentionRegEx = /^png|jpe?g|webp|gif$/;
+
     this.postForm = this.formBuilder.group({
       title: [null],
       content: [null],
@@ -71,21 +76,32 @@ export class CreateAPostComponent implements OnInit {
 
   // Detects if the user has selected a file
   onFileSelected(event: any) {
-    const file = event.target.files[0];
-    this.postForm.get('attachment')!.setValue(file);
-    this.postForm.updateValueAndValidity();
-    const reader = new FileReader();
-    // reader.onload = () => {
-    //   this.imagePreview = reader.result as File;
-    // };
-    reader.readAsDataURL(file);
+    // check if the extention is valid
+    if (event.target.files[0].type.match(this.extentionRegEx)) {
+      const file = event.target.files[0];
+      this.postForm.get('attachment')!.setValue(file);
+      this.postForm.updateValueAndValidity();
+      const reader = new FileReader();
+      // reader.onload = () => {
+      //   this.imagePreview = reader.result as File;
+      // };
+      reader.readAsDataURL(file);
+    } else {
+      this.infoBox = {'errorMsg' : 'Type de fichier invalide'}
+      this.errorType = true;
+    }
   }
 
   // On submit create the post in the database
   onPost() {
     var { title, content } = this.postForm.value;
+    var attachment = this.postForm.get('attachment')!.value;
 
-    this.PostsService.createAPost(title, content, this.postForm.get('attachment')!.value)
+    if(this.errorType = true){
+      window.location.reload();
+    }
+
+    this.PostsService.createAPost(title, content, attachment)
     .subscribe({
       next: (v) => console.log(v),
       error: (e) => this.infoBox = {'errorMsg' : e.error.message},

@@ -20,21 +20,12 @@ export class AuthGuardInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {    
     return next.handle(req).pipe(catchError(err => {
-      // console.log(document.cookie)
-      if ([418].includes(err.status)){
-        return this.handle418Error(req, next, err);
-        // this.authService.refreshToken()
-        // .then(() => {
-        //   // location.reload()
-        //   console.log(req)
-        //   return next.handle(req).pipe(retry(5))
-        // })
-      } else if ([404].includes(err.status)){
+      if ([500, 404, 401].includes(err.status)) {
         return next.handle(req)
+      } else if ([418].includes(err.status)){
+        return this.handle418Error(req, next, err);
       } else if ([403].includes(err.status)){
         this.authService.logout()
-        return next.handle(req)
-      } else if ([401].includes(err.status)){
         return next.handle(req)
       }
       const error = (err && err.error && err.error.message) || err.statusText;
