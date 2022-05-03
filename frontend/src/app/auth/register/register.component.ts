@@ -13,6 +13,7 @@ export class RegisterComponent implements OnInit {
   // Form variables
   registerForm!: FormGroup;
   emailRegex!: RegExp;
+  passwordRegex!: RegExp;
 
   // Info variables (success, error, loading)
   infoBox: any = {};
@@ -31,12 +32,15 @@ export class RegisterComponent implements OnInit {
     // Set email regex
     this.emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+    // Set password regex (min 8 characters, 1 uppercase, 1 lowercase and 1 number)
+    this.passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;
+
     // Register form
     this.registerForm = this.formBuilder.group({
       avatar: [null],
       email: [null, [Validators.required, Validators.pattern(this.emailRegex)]],
       username: [null, [Validators.required]],
-      password: [null, [Validators.required]]
+      password: [null, [Validators.required, Validators.pattern(this.passwordRegex)]],
     })
   }
 

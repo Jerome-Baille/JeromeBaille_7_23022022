@@ -19,7 +19,7 @@
                             aria-describedby="search-text" 
                             [(ngModel)]="searchText" 
                             placeholder="Rechercher un post..." 
-                            autofocus
+                            autocomplete="off"
                     >
                     <button class="nav__search__btn" (click)="clearSearch()">
                         <fa-icon [icon]="faCircleXmark"></fa-icon>

@@ -23,17 +23,10 @@ export class LandingPageComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
 
-    this.authService.checkIsAuth()
-    .then((v) => {
-        this.isAuth = v
-        this.userId = this.isAuth.userId;
-        this.isAdmin = this.isAuth.isAdmin;
-        this.loading = false;
-      })
-    .catch((e) => {
-        this.isAuth = null
-        this.loading = false;
-    })
+    this.userId = this.authService.getUserId();
+    this.isAdmin = this.authService.checkIsAdmin();
+
+    this.loading = false;
   }
 
   onContinue(): void {
