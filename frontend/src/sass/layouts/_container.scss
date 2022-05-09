@@ -475,10 +475,10 @@
               font-size: 0.9rem;
   
               & a {
-                color: darken($color-card-header, 25%);
+                color: $color-user-link;
 
                 &:hover {
-                  color: darken($color-card-header, 60%);
+                  color: darken($color-user-link, 60%);
                 }
               }
             }

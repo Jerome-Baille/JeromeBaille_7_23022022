@@ -72,7 +72,7 @@
                                         </td>
                                         <td>
                                             {{ displayProfile.Posts.length }}
-                                          <button class="btn-chevron" *ngIf="(displayProfile.Posts.length!= 0)" (click)="loadChildComponent('loadPosts')">
+                                          <button class="btn-chevron" *ngIf="(displayProfile.Posts.length!= 0)" (click)="loadChildComponent('loadPosts')" aria-label="Toggle menu post">
                                               <fa-icon *ngIf="loadPosts" [icon]="faChevronUp"></fa-icon>
                                               <fa-icon *ngIf="!loadPosts" [icon]="faChevronDown"></fa-icon>
                                           </button> 

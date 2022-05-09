@@ -21,8 +21,9 @@
                             [(ngModel)]="searchText" 
                             placeholder="Rechercher un post..." 
                             autocomplete="off"
+                            aria-label="Rechercher un post"
                     >
-                    <button class="nav__search__btn" (click)="clearSearch()">
+                    <button class="nav__search__btn" (click)="clearSearch()" aria-label="Effacer la recherche">
                         <fa-icon [icon]="faCircleXmark"></fa-icon>
                     </button>
                 </div>

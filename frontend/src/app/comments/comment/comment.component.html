@@ -24,20 +24,20 @@
             
         <div class="container--comment__btn">
             <div class="points__container">
-                <button [ngStyle]="(findRightUser() =='like')? {'color':'green'} : {} " id="likeCom-{{ com.id }}" type="submit" (click)="onLikeComment()">
+                <button [ngStyle]="(findRightUser() =='like')? {'color':'green'} : {} " id="likeCom-{{ com.id }}" type="submit" (click)="onLikeComment()" aria-label="Liker le commentaire">
                     <fa-icon [icon]="faCircleUp"></fa-icon>
                 </button>
                 <span id="pointsCom-{{ com.id }}">
                     {{ com.points }}
                 </span>
-                <button [ngStyle]="(findRightUser() == 'dislike')? {'color':'darkred'} : {} " id="dislikeCom-{{ com.id }}" type="submit" (click)="onDislikeComment()">
+                <button [ngStyle]="(findRightUser() == 'dislike')? {'color':'darkred'} : {} " id="dislikeCom-{{ com.id }}" type="submit" (click)="onDislikeComment()" aria-label="Disliker le commentaire">
                     <fa-icon [icon]="faCircleDown"></fa-icon>
                 </button>
             </div>
     
             <div class="dropdown">
                 <input type="checkbox" id="dropdown-{{ com.id }}" class="checkbox" (click)="closeOtherCheckboxes()">
-                <label for="dropdown-{{ com.id }}" class="dropbtn dropbtn--box">
+                <label for="dropdown-{{ com.id }}" class="dropbtn dropbtn--box" aria-label="dropdown menu commentaire">
                     <fa-icon [icon]="faCircleEllipsisVertical"></fa-icon>
                 </label>
                 <div class="dropdown-content dropdown-content--lower">

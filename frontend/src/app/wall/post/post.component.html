@@ -5,11 +5,11 @@
     <div class="card container" id="post-{{ post.id }}">
         <section id="points" class="points">
             <div class="points__container points__container--col">
-                <button [ngStyle]="(post.Likes && findRightUser(post.Likes) == 'like')? {'color': 'green'} : {}" id="like-{{ post.id }}" type="submit" (click)="onLikePost()">
+                <button [ngStyle]="(post.Likes && findRightUser(post.Likes) == 'like')? {'color': 'green'} : {}" id="like-{{ post.id }}" type="submit" (click)="onLikePost()" aria-label="Like le post">
                     <fa-icon [icon]="faCircleUp"></fa-icon>
                 </button>
                 <span id="points-{{ post.id }}">{{ post.points }}</span>
-                <button [ngStyle]="(post.Likes && findRightUser(post.Likes) == 'dislike')? {'color': 'darkred'} : {}" id="dislike-{{ post.id }}" type="submit" (click)="onDislikePost()">
+                <button [ngStyle]="(post.Likes && findRightUser(post.Likes) == 'dislike')? {'color': 'darkred'} : {}" id="dislike-{{ post.id }}" type="submit" (click)="onDislikePost()" aria-label="Dislike le post">
                     <fa-icon [icon]="faCircleDown"></fa-icon>
                 </button>
             </div>
@@ -41,7 +41,7 @@
 
                 <div class="main__content__check-container">
                     <input type="checkbox" id="chk-{{ post.id }}" class="checkbox"> 
-                    <label for="chk-{{ post.id }}" class="checkbox__label" [ngClass]="((userId == post.User.id) || isAdmin) ? 'l-fit' : 's-fit'">
+                    <label for="chk-{{ post.id }}" class="checkbox__label" [ngClass]="((userId == post.User.id) || isAdmin) ? 'l-fit' : 's-fit'" aria-label="Menu du post">
                         <div class="checkbox__label__icons">
                             <fa-icon [icon]="faChevronLeft" class="left-arrow"></fa-icon>
                             <fa-icon [icon]="faChevronRight" class="right-arrow"></fa-icon>

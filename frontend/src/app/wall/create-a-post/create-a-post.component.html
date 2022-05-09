@@ -9,20 +9,18 @@
               <div class="form-group--create-post__bubble-pic">
                 <img src="{{ user.avatar? user.avatar : '../../assets/default-profile-picture.jpg' }}" alt="Photo de profil de {{user.username}}">
               </div>
-                <label for="content" ></label>
-                <textarea class="form-group__textarea form-group__textarea--big" name="content" id="content" form="postForm" formControlName="content"  placeholder="What's on your mind?"></textarea>        
+                <textarea class="form-group__textarea form-group__textarea--big" name="content" id="content" form="postForm" formControlName="content"  placeholder="What's on your mind?" aria-label="Zone de saisie du message"></textarea>        
           </div>
         <div class="form-group">
-            <label for="attachment"></label>
-            <input id="attachment" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
+            <input id="attachment" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;" aria-label="Fichier sélectionné">
             <div (mouseover)="imgHelper(true)" (mouseout)="imgHelper(false)" class="form-group__img-manager">
               {{fileUpload.value || 'Aucun fichier séléctionné'}}
 
-              <button class="btn--small" (click)="fileUpload.click()">
+              <button class="btn--small" (click)="fileUpload.click()" aria-label="Charger une image">
                 <fa-icon [icon]="faImage"></fa-icon> 
               </button>
             </div>
-            <button *ngIf="fileUpload.value" class="btn--small" (click)="clearAttachmentInput()">
+            <button *ngIf="fileUpload.value" class="btn--small" (click)="clearAttachmentInput()" aria-label="Supprimer l'image sélectionnée">
               <fa-icon [icon]="faCircleXmark"></fa-icon>
             </button>
         </div>

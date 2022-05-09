@@ -5,7 +5,7 @@
                 <img src="../../assets/icon-left-font-1.svg" alt="Logo de Groupomania">
             </a>
 
-            <button class="nav__list" (click)="onToggle()">
+            <button class="nav__list" (click)="onToggle()" aria-label="toggle menu">
                 <fa-icon [icon]="faBars" class="nav__list--icon"></fa-icon>
             </button>
     
@@ -15,7 +15,7 @@
                 </a>
     
                 <div class="dropdown">
-                    <button class="dropbtn">
+                    <button class="dropbtn" aria-label="dropdown menu">
                         <img src="../../assets/user.png" alt="" class="nav-btn">
                     </button>
                     <div class="dropdown-content">
