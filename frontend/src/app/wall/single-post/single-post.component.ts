@@ -92,7 +92,7 @@ export class SinglePostComponent implements OnInit {
           this.infoToComment = {postId, totalComments, 'userId' : this.userId, 'isAdmin' : this.isAdmin};
         },
         error: (e) => {
-          this.infoBox = {'errorMsg' : e.error.message, 'origin': 'singlePost', 'id': this.post.id}
+          this.infoBox = {'errorMsg' : e.error.message, 'origin': 'singlePost', 'id': postId}
           this.loading = false;
         },
         complete: () => this.loading = false
