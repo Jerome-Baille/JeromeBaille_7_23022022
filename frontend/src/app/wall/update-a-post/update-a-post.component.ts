@@ -24,6 +24,7 @@ export class UpdateAPostComponent implements OnInit {
   // Info variables (success, error, loading)
   infoBox: any = {};
   loading: boolean = true;
+  returnData!: any;
 
   // FontAwesome icons
   faImage = faImage;
@@ -93,9 +94,12 @@ export class UpdateAPostComponent implements OnInit {
 
     this.postsService.updateAPost(postId, title, content, attachment)
     .subscribe({
-      next: (v) => this.infoBox = {'infoMsg' : Object.values(v), 'origin': 'updatePost', 'id': this.post.id},
+      next: (v) => {
+        this.returnData = v
+        this.infoBox = {'infoMsg' : this.returnData.message, 'origin': 'updatePost', 'id': this.post.id}
+      },
       error: (e) => this.infoBox = {'errorMsg' : e.error.message, 'origin': 'updatePost', 'id': this.post.id},
-      complete: () => this.postUpdated.emit({message : 'post updated', 'info': this.infoBox.infoMsg, 'error': this.infoBox.errorMsg, 'origin': 'updatePost', 'id': this.post.id})
+      complete: () => this.postUpdated.emit({message : 'post updated', title, content, 'attachment': this.returnData.post.attachment, 'info': this.infoBox.infoMsg, 'error': this.infoBox.errorMsg, 'origin': 'updatePost', 'id': this.post.id})
     })
   }
 

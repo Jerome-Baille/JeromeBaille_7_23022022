@@ -1,6 +1,6 @@
 // Imports
 const fs              = require ('fs');
-const sharp = require('sharp');
+const sharp           = require('sharp');
 
 // Models
 const { Post, User, Comment, Like }  = require('../models');
@@ -203,7 +203,7 @@ exports.updatePost = (req, res, next) => {
                   { ...postObject, id: paramId },
                   { where: { id: paramId } }
                 )
-                  .then(() => res.status(200).json({ message : `Post modifié avec succès !` }))
+                  .then(() => res.status(200).json({ message : `Post modifié avec succès !`, post: postObject }))
                   .catch((err) => res.status(400).json({ message: err }));
               })
             });
@@ -218,7 +218,7 @@ exports.updatePost = (req, res, next) => {
               { ...postObject, id: paramId },
               { where: { id: paramId } }
             )
-              .then(() => res.status(200).json({ message : `Post modifié avec succès !` }))
+              .then(() => res.status(200).json({ message : `Post modifié avec succès !`, post: postObject }))
               .catch((err) => res.status(400).json({ message: err }));
           }
 
@@ -230,7 +230,7 @@ exports.updatePost = (req, res, next) => {
             { ...postObject, id: paramId },
             { where: { id: paramId } }
           )
-            .then(() => res.status(200).json({ message : `Post modifié avec succès !` }))
+            .then(() => res.status(200).json({ message : `Post modifié avec succès !`, post: postObject }))
             .catch((err) => res.status(400).json({ message: err }));
         }        
       } else {

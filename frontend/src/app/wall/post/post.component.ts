@@ -311,7 +311,18 @@ export class PostComponent implements OnInit {
   triggeredFromChildren(eventData: any) {
     switch(eventData.message) {
       case 'post updated':
-        this.ngOnInit();
+        if(eventData.content) {
+          this.post.content = eventData.content;
+        }
+
+        if(eventData.title) {
+        this.post.title = eventData.title;
+        }
+
+        if(eventData.attachment) {
+          this.post.attachment = eventData.attachment
+        }
+
         this.loadEditPost = false;
         this.infoBox = {'infoMsg' : eventData.info, 'errorMsg' : eventData.error, 'origin': 'post', 'id': this.post.id}
         break;
