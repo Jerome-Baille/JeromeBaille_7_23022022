@@ -3,11 +3,11 @@
 Ceci est le projet 7 du parcours développeur web
 
 
-!\[AwesomeCourses\](https://badgen.net/badge/Project/OpenClassrooms/purple)
-!\[FrontEnd\](https://badgen.net/badge/Frontend/Angular/red)
-!\[BackEnd\](https://badgen.net/badge/Backend/Node.js/green)
-!\[Database\](https://badgen.net/badge/Database/MySQL/blue)
-!\[Style\](https://badgen.net/badge/Style/Sass/pink)
+![AwesomeCourses](https://badgen.net/badge/Project/OpenClassrooms/purple)
+![FrontEnd](https://badgen.net/badge/Frontend/Angular/red)
+![BackEnd](https://badgen.net/badge/Backend/Node.js/green)
+![Database](https://badgen.net/badge/Database/MySQL/blue)
+![Style](https://badgen.net/badge/Style/Sass/pink)
 
 
 ## Mission
