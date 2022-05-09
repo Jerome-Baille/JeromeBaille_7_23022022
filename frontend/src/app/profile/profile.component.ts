@@ -112,7 +112,19 @@ export class ProfileComponent implements OnInit {
       .subscribe({
         next: (v) => console.log(v),
         error: (e) => console.error(e),
-        complete: () =>  window.location.href="/"
+        complete: () =>  {
+          if(this.isAdmin== false){
+            this.authService.logout()
+            .subscribe({
+              next: (v) => console.log(v),
+              error: (e) =>  this.infoBox = {'errorMsg' : e.error.message, 'origin': 'logout', 'id': 1},
+              complete: () => window.location.reload()   
+            })
+          } else {
+            window.location.reload()
+          }
+
+        }
       })
     }
   }

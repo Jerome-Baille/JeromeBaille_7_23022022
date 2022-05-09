@@ -460,7 +460,6 @@ exports.deleteUserProfile = (req, res, next) => {
                         .then(() => {
                             user.destroy()
                             return res
-                                .clearCookie("jwt", {domain: 'localhost', path: '/'})
                                 .status(200)
                                 .json({message: `Le compte a été supprimé avec succès.`})
                         })
