@@ -1,0 +1,42 @@
+/* Colors */
+
+// Main colors
+$color-background: rgba(196, 196, 196, 0.5);
+$color-foreground: #FFFFFF;
+
+// card colors
+$color-border-different-card: rgba(255, 0, 0, 0.38);
+$color-card-header : #FFE0E0;
+$color-card-footer: darken(#FDFDFD, 3%);
+$color-card-border: rgba(0, 0, 0, 0.25);
+$color-card-darkborder: rgba(0, 0, 0, 0.5);
+
+// Aside section colors
+$color-foreground-aside: #FDFDFD;
+$color-background-aside:rgba(196, 196, 196, 0.25);
+$color-border-aside : rgba(0, 0, 0, 0.5);
+
+// Box shadow colors
+$color-soft-box-shadow: rgba(0, 0, 0, 0.25);
+$color-box-shadow : rgba(112, 112, 112, 0.25);
+$color-box-shadow-hover : rgba(112, 112, 112, 0.6);
+
+// Button colors
+$color-btn-primary : #FFE0E0;
+$color-btn-secondary: lightgray;
+
+// Icon and information box colors
+$color-exclamation-mark: sandybrown;
+$color-validation-mark: olivedrab;
+$color-success-message: #4CAF50;
+$color-trash-slash-mark: #dd1b16;
+$color-error-message: #F44336;
+$color-graduate-mark: goldenrod;
+
+// User link colors
+$color-user-link : darkred;
+$color-user-link-hover : rgba(0, 0, 0, 0.25);
+
+// Rocket (go to the top button) colors
+$color-rocket : #E43020;
+$color-flame: #FBB741;

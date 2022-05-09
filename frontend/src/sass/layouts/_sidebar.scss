@@ -7,12 +7,12 @@
     align-items: center;
     justify-content: space-around;
 
-    background: rgba(196, 196, 196, 0.25);
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    background: $color-background-aside;
+    box-shadow: 0px 4px 4px $color-box-shadow;
     border-radius: 8px;
 
     &:hover {
-        box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.8);
+        box-shadow: 0px 8px 8px $color-box-shadow-hover ;
     }
 
     & .card__link{
@@ -63,7 +63,7 @@
         }
     
         .user-link{
-            color: darkred;
+            color: $color-user-link;
             z-index: 999;
         
             &:hover{

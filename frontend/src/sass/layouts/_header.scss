@@ -1,9 +1,9 @@
 @import "../../sass/utils/mixins";
 
 header {
-  border-bottom: 2px solid rgba(0, 0, 0, 0.25);
+  border-bottom: 2px solid $color-card-border;
   min-height: 5rem;
-  background-color: #FDFDFD;
+  background-color: $color-foreground-aside;
 
   & .nav {
     display: flex;
@@ -135,23 +135,6 @@ header {
 
     &__list {
       display: none;
-    }
-
-    &__search {
-      width: 620px;
-      height: 40px;
-      border: 1px solid rgba(0, 0, 0, 0.5);
-      box-sizing: border-box;
-      box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
-      border-radius: 8px;
-
-      &::placeholder {
-        color: #FF0000;
-        padding-left: 2rem;
-        font-weight: 400;
-        font-size: 18px;
-        line-height: 21px;
-      }
     }
 
     @include mobile {

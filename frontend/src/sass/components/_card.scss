@@ -1,0 +1,27 @@
+.card {
+    background: $color-foreground;
+    border-radius: 8px;
+    max-width: 900px;
+
+    &img {
+        width: 100%;
+    }
+
+    &h2 {
+    margin-bottom: 0;
+    }
+
+    &p {
+    font-weight: 300;
+    font-size: 1rem;
+    }
+
+    &--denied {
+        margin: 2rem auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-bottom: 2rem;
+    }
+}

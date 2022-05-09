@@ -14,36 +14,36 @@
 
         &:hover {
             cursor: pointer;
-            filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+            filter: drop-shadow(0 4px 4px $color-soft-box-shadow);
         }
     }
 }
 
 .btn {
-    background: #FFE0E0;
+    background: $color-btn-primary;
     border-radius: 8px;
     min-height: 2rem;
     width: 15rem;
-    box-shadow: 0 0 15px rgba(112, 112, 112, 0.1);
+    box-shadow: 0 0 15px $color-box-shadow;
 
     &--center{
         margin: auto;
     }
 
     &:hover{
-        box-shadow: 0 4px 8px 0 rgba(112, 112, 112, 0.6); 
+        box-shadow: 0 4px 8px 0 $color-box-shadow-hover; 
     }
 }
 
 .btn--small {
-    background-color: lightgray;
+    background-color: $color-btn-secondary;
     border-radius: 8px;
     min-height: 2rem;
     padding: 0.5rem 1rem;
-    box-shadow: 0 0 15px rgba(112, 112, 112, 0.1);
+    box-shadow: 0 0 15px $color-box-shadow;
 
     &:hover{
-        box-shadow: 0 4px 8px 0 rgba(112, 112, 112, 0.6); 
+        box-shadow: 0 4px 8px 0 $color-box-shadow-hover; 
     }
 }
 
@@ -64,16 +64,16 @@
     cursor: pointer;
 
     & .faCircleExclamation {
-        color: sandybrown;
+        color: $color-exclamation-mark;
     }
     & .faThumbsUp, .faPenToSquare {
-        color: olivedrab;
+        color: $color-validation-mark;
     }
     & .faTrash, .faUserSlash {
-        color: #dd1b16;
+        color: $color-trash-slash-mark;
     }
     & .faUserGraduate {
-        color: goldenrod;
+        color: $color-graduate-mark;
     }
 
 
@@ -95,7 +95,7 @@
     }
   
     &:hover{
-        box-shadow: 0 4px 8px 0 rgba(112, 112, 112, 0.6); 
+        box-shadow: 0 4px 8px 0 $color-box-shadow-hover; 
     }
 }
 
@@ -106,14 +106,14 @@
 
     &:hover{
         color: darkred;
-        filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+        filter: drop-shadow(0 4px 4px $color-user-link-hover);
     }
 }
 
 
 .points {
     width: 3rem;
-    background-color: lightgray;
+    background-color: $color-btn-secondary;
     display: flex;
     justify-content: center;
     padding-top: 1rem;
@@ -137,7 +137,7 @@
             font-size: 1.5rem;
 
             :hover{
-                color: grey;
+                opacity: 0.75;
             }
         }
       }
@@ -161,9 +161,9 @@
   }
   
   #myBtn:hover {
-    color: #E43020;
+    color: $color-rocket;
     & fa-icon {
-        filter: drop-shadow(-4px 4px 1px #FBB741);
+        filter: drop-shadow(-4px 4px 1px $color-flame);
     }
 
   }

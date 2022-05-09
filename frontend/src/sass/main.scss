@@ -1,6 +1,7 @@
-@import"https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Shrikhand&display=swap";
+@import"https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900";
 
 /* Utils */
+@import "utils/variables";
 @import "utils/mixins";
 @import "utils/animations";
 
@@ -14,6 +15,7 @@
 @import "pages/register";
 
 /* Components */
+@import "components/card";
 @import "./components/buttons";
 @import "./components/loading";
 @import "./components/info-box";

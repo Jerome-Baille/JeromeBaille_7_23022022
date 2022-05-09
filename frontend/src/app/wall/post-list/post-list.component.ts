@@ -16,8 +16,8 @@ export class PostListComponent implements OnInit {
   isAuth: any = [];
 
   // Main data variables
-  topPosts!: any;
-  posts!: any;
+  topPosts: any = [];
+  posts: any = [];
 
   // Info variables (loading)
   loading: boolean = true;
