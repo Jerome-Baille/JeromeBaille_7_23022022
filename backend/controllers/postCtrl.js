@@ -5,9 +5,11 @@ const sharp           = require('sharp');
 // Models
 const { Post, User, Comment, Like }  = require('../models');
 
+// Resize image using sharp to achive a thumbnail and reduce bandwidth usage when possible
 async function resizeImage(input) {
   try {
     await sharp(input.path)
+    // the image will be resized to a width of 150px and the height will be calculated based on the aspect ratio
       .resize({
         width: 150
       })

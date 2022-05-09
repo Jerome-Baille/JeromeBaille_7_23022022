@@ -262,9 +262,17 @@ exports.deleteComments = (req, res, next) => {
       where: {id: paramComId}
   }) 
   .then(function(commentsFound){
-    if (commentsFound.userId === tokenUserId || tokenIsAdmin == true){            
+    if (commentsFound.userId === tokenUserId || tokenIsAdmin == true){     
+      if(commentsFound.attachment){
+        const image = commentsFound.attachment.split("/images/")[1];
+        fs.unlink(`images/${image}`, () => {
+          commentsFound.destroy();
+        })
+        return res.status(201).json({ message: `Le commentaire a été supprimé avec succès.` }); 
+      } else {
         commentsFound.destroy();
-        return res.status(201).json({ message: `Le commentaire a été supprimé avec succès.` });  
+        return res.status(201).json({ message: `Le commentaire a été supprimé avec succès.` }); 
+      }       
     } else {
       return res.status(403).json({ message: `Vous n'êtes pas autorisé à suprimer ce commentaire`})
     }
