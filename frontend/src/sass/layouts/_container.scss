@@ -72,6 +72,9 @@
         text-align: center; 
         border-left: solid 1px darkgrey; 
         margin-left: 25px;
+        & img {
+          max-width: 250px;
+        }
       }
     
       &__btn{
@@ -104,6 +107,11 @@
         &:hover{
             font-style: italic;
         }
+
+        &--profile{
+          position: absolute;
+          right: 1rem;
+        }
       }
     
       &__header {
@@ -122,6 +130,7 @@
 
         &--center {
           @include flex-center;
+          position: relative;
         }
 
         &__text {
@@ -160,7 +169,7 @@
         }
 
 
-        &--password-container {
+        &--pos-relative {
           position: relative;
         }
 
@@ -220,22 +229,19 @@
           justify-content: space-between; 
           align-items: center; width: 100%; 
           margin-left: 2rem;
-          & button{
-            border-radius: 50%;
-            background-color: lightpink;
-            overflow: hidden;
-            @include flex-center;
-            height: 2rem;
-            width: 2rem;
-            cursor: pointer;
-          }
-            :hover{
-              background-color: lightgreen; 
-            }
           & fa-icon {
             font-size: 1rem;
             cursor: pointer;
           }
+        }
+
+        &__img-helper {
+          display: flex; 
+          flex-direction: column; 
+          font-size:0.8rem; 
+          width: fit-content; 
+          margin:auto; 
+          text-align: left;
         }
 
         &__buttons {

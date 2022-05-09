@@ -1,71 +1,41 @@
-<div class="container--comment">
-    <section class="container--comment__header">
-        <div>
-            <img class="container--comment__header__avatar" src="{{ post.User.avatar? post.User.avatar : '../../assets/default-profile-picture.jpg' }}" alt="{{ post.User.username }}">
-        </div> 
+  <!-- Loading spinner -->
+<app-loading *ngIf="loading; else loaded"></app-loading>
 
-        <p>
-          ~~ Commenter ce post ~~
-      </p> 
-    </section>
+<ng-template #loaded>
+  <div class="container--comment">
+      <section class="container--comment__header">
+          <div>
+              <img class="container--comment__header__avatar" src="{{ post.User.avatar? post.User.avatar : '../../assets/default-profile-picture.jpg' }}" alt="{{ post.User.username }}">
+          </div> 
 
-    <form [formGroup]="commentForm">   
-      <div class="form-group">
-      <label for="content"> </label>
-      <textarea class="form-group__textarea form-group__textarea--big" id="content" type="text" formControlName="content" placeholder="Votre commentaire..."></textarea>
-    </div>
-    <div class="form-group">
-        <label for="attachment"></label>
-        <input id="attachment" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
-        <div class="form-group__img-manager">
-          {{fileUpload.value || 'Aucun fichier séléctionné'}}
+          <p>
+            ~~ Commenter ce post ~~
+        </p> 
+      </section>
 
-          <button (click)="fileUpload.click()">
-            <fa-icon [icon]="faPaperclip"></fa-icon> 
-          </button>  
-        </div>
-      </div>
-        <div class="form-group__buttons form-group__buttons--create-com">
-            <button class="btn" type="submit" (click)="onComment()" [disabled]="commentForm.invalid">Enregistrer</button>
-        </div>
-        <app-info-box [infoBox]="infoBox"></app-info-box>
-    </form>
-
-</div>
-
-
-
-
-
-<!-- <div class="card container">
-  <main class="main main--center main--pt-pb">
-    
-    
-    
-    
-    <form [formGroup]="commentForm">   
+      <form [formGroup]="commentForm">   
         <div class="form-group">
         <label for="content"> </label>
-        <textarea class="form-group__textarea form-group__textarea--big" id="content" type="text" formControlName="content" placeholder="Commenter ce post..."></textarea>
-    </div>
-    <div class="form-group">
-        <label for="attachment"></label>
-        <input id="attachment" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
-        <div class="form-group__img-manager">
-          {{fileUpload.value || 'Aucun fichier séléctionné'}}
-  
-          <button (click)="fileUpload.click()">
-            <fa-icon [icon]="faPaperclip"></fa-icon> 
-          </button>  
-        </div>
+        <textarea class="form-group__textarea form-group__textarea--big" id="content" type="text" formControlName="content" placeholder="Votre commentaire..."></textarea>
       </div>
-        <div class="form-group__buttons">
-            <button class="btn" type="submit" (click)="onComment()" [disabled]="commentForm.invalid">Enregistrer</button>
+      <div class="form-group">
+          <label for="attachment-newComment"></label>
+          <input id="attachment-newComment" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
+          <div class="form-group__img-manager">
+            {{fileUpload.value || 'Aucun fichier séléctionné'}}
+
+            <button class="btn--small" (click)="fileUpload.click()">
+              <fa-icon [icon]="faImage"></fa-icon> 
+            </button>  
+          </div>
+          <button *ngIf="fileUpload.value" class="btn--small" (click)="clearAttachmentInput()">
+            <fa-icon [icon]="faCircleXmark"></fa-icon>
+          </button>
         </div>
-        <app-info-box [infoBox]="infoBox"></app-info-box>
-    </form>
-
-
-
-  </main>
-</div> -->
+          <div class="form-group__buttons form-group__buttons--create-com">
+              <button class="btn" type="submit" (click)="onComment()" [disabled]="!commentForm.controls['content'].value && errorAttachment">Enregistrer</button>
+          </div>
+          <app-info-box [infoBox]="infoBox"></app-info-box>
+      </form>
+  </div>
+</ng-template>

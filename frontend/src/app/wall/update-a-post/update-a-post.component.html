@@ -1,33 +1,46 @@
-<div class="card container">
-  <main class="main main--center">
-    <form [formGroup]="updatePostForm">   
-      <!-- <div class="form-group">
-          <label for="title">Titre </label>
-          <input id="title" type="text" formControlName="title" placeholder="{{ post.title }}">
-      </div> -->
-      <div class="form-group">
-        <label for="content"></label>
-        <textarea class="form-group__textarea form-group__textarea--big" name="content" id="content" form="postForm" formControlName="content"  placeholder="{{ post.content }}"></textarea>
-    </div>
-    <div class="form-group">
-      <label for="attachment"></label>
-      <input id="attachment" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
-      <div class="form-group__img-manager">
-        {{fileUpload.value || 'Aucun fichier séléctionné'}}
+<!-- Loading spinner -->
+<app-loading *ngIf="loading; else loaded"></app-loading>
 
-        <button (click)="fileUpload.click()">
-          <fa-icon [icon]="faPaperclip"></fa-icon> 
+<ng-template #loaded>
+  <div class="card container">
+    <main class="main main--center">
+      <section class="btn--close">
+        <button>
+            <fa-icon [icon]="faCircleXmark" (click)="close()"></fa-icon>
         </button>
-        <button *ngIf="post.attachment" type="submit" (click)="onDelPicture()">
+      </section>
+      <form [formGroup]="updatePostForm">   
+        <!-- <div class="form-group">
+            <label for="title">Titre </label>
+            <input id="title" type="text" formControlName="title" placeholder="{{ post.title }}">
+        </div> -->
+        <div class="form-group">
+          <label for="content"></label>
+          <textarea class="form-group__textarea form-group__textarea--big" name="content" id="content" form="postForm" formControlName="content"  placeholder="{{ post.content }}"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="attachment-{{post.id}}"></label>
+          <input id="attachment-{{post.id}}" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
+          <div class="form-group__img-manager">
+            {{fileUpload.value || 'Aucun fichier séléctionné'}}
+
+            <button class="btn--small" (click)="fileUpload.click()">
+              <fa-icon [icon]="faImage"></fa-icon> 
+            </button>
+          </div>
+          <button *ngIf="fileUpload.value" class="btn--small" (click)="clearAttachmentInput()">
+            <fa-icon [icon]="faCircleXmark"></fa-icon>
+          </button>
+        </div>
+        <button *ngIf="post.attachment" class="btn--small" type="submit" (click)="onDelPicture()">
           <fa-icon [icon]="faTrashCan"></fa-icon>
+          Supprimer l'image actuelle
         </button>
-
-      </div>
-    </div>
-      <div class="form-group__buttons">
-          <button class="btn" type="submit" (click)="onUpdatePost()" [disabled]="updatePostForm.invalid">Enregistrer</button>
-      </div>
-      <app-info-box [infoBox]="infoBox"></app-info-box>
-    </form>
-  </main>
-</div>
+        <div class="form-group__buttons">
+            <button class="btn" type="submit" (click)="onUpdatePost()" [disabled]="updatePostForm.invalid">Enregistrer</button>
+        </div>
+        <app-info-box [infoBox]="infoBox"></app-info-box>
+      </form>
+    </main>
+  </div>
+</ng-template>

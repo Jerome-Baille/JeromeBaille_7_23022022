@@ -1,3 +1,4 @@
+<!-- Loading spinner -->
 <app-loading *ngIf="loading; else loaded"></app-loading>
 
 <ng-template #loaded>
@@ -13,11 +14,11 @@
         </section>
 
         <a class="card__link" routerLink="/wall/{{com.postId}}">
-            <p class="container--comment__content">
+            <p *ngIf="com.content" class="container--comment__content">
                         {{ com.content }}
                     </p>
-            <div class="container--comment__attachment">
-                <img *ngIf="com.attachment" [src]="com.attachment" alt="">
+            <div *ngIf="com.attachment" class="container--comment__attachment">
+                <img [src]="com.attachment" alt="">
             </div>
         </a>
             

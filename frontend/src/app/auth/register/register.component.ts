@@ -14,6 +14,9 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   emailRegex!: RegExp;
   passwordRegex!: RegExp;
+  emailHelperBoolean: boolean = false;
+  usernameHelperBoolean: boolean = false;
+  passwordHelperBoolean: boolean = false;
 
   // Info variables (success, error, loading)
   infoBox: any = {};
@@ -29,6 +32,8 @@ export class RegisterComponent implements OnInit {
               private router: Router) { }
 
   ngOnInit(): void {
+    this.loading = true;
+
     // Set email regex
     this.emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -42,6 +47,8 @@ export class RegisterComponent implements OnInit {
       username: [null, [Validators.required]],
       password: [null, [Validators.required, Validators.pattern(this.passwordRegex)]],
     })
+
+    this.loading = false;
   }
 
   // If success registers the user in the database
@@ -51,7 +58,7 @@ export class RegisterComponent implements OnInit {
     this.AuthService.register(email, username, password)
     .subscribe({
       next: (v) => console.log(v),
-      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      error: (e) => this.infoBox = {'errorMsg' : e.error.message, 'origin': 'register', 'id': 1},
       complete: () => {
         // automatically logs in the user
         this.AuthService.login(email, password)
@@ -66,5 +73,16 @@ export class RegisterComponent implements OnInit {
   // Show/hide the typed password
   toggleVisibility() {
     this.visiblePassword = !this.visiblePassword;
+  }
+
+  helper(src: string, status: boolean) {
+    switch(src) {
+      case 'email':
+        this.emailHelperBoolean = status;
+        break;
+      case 'password':
+        this.passwordHelperBoolean = status;
+        break;
+    }
   }
 }

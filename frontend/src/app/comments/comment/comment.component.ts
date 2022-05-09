@@ -1,7 +1,8 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { faTrash, faPenToSquare, faCircleExclamation, faCircleDown, faCircleUp, faThumbsUp, faCircleCheck, faCircleXmark, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import { CommentsService } from 'src/app/services/comments.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-comment',
@@ -10,8 +11,7 @@ import { CommentsService } from 'src/app/services/comments.service';
 })
 export class CommentComponent implements OnInit {
   // Info sent to the parent component
-  @Output() 
-  dataEmited: EventEmitter<string> = new EventEmitter<string>();
+  @Output() dataEmited: EventEmitter<any> = new EventEmitter<any>();
 
   // Get all comments of a post from parent component
   @Input() com!: any;
@@ -46,7 +46,8 @@ export class CommentComponent implements OnInit {
 
   constructor(
     private CommentsService : CommentsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -62,8 +63,8 @@ export class CommentComponent implements OnInit {
   onDeleteComment() {
     this.CommentsService.deleteAComment(this.com.id)
     .subscribe({
-      next: (v) => this.infoBox = {'infoMsg' : Object.values(v)},
-      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      next: (v) => this.infoBox = {'infoMsg' : Object.values(v), 'origin': 'comment', 'id': this.com.id},
+      error: (e) => this.infoBox = {'errorMsg' : e.error.message, 'origin': 'comment', 'id': this.com.id},
       complete: () => {
         // Remove the comment from the local storage
         var storedCom = JSON.parse(localStorage.getItem(`post-${this.com.postId}`)!);
@@ -75,7 +76,7 @@ export class CommentComponent implements OnInit {
 
         document.getElementById(`com-${this.com.id}`)!.remove();
 
-        this.dataEmited.emit()
+        this.dataEmited.emit({message: 'comment removed'})
       }
     })
   }
@@ -83,15 +84,39 @@ export class CommentComponent implements OnInit {
   // Load the update comment component
   loadChildComponent() {
     this.ngOnInit();
+
+    // close the dropdown menu
+    var dropdownCheckBox = document.getElementsByClassName("checkbox");
+    // transform dropdown to array
+    var dropdownArray = Array.prototype.slice.call(dropdownCheckBox);
+
+    for (var i = 0; i < dropdownArray.length; i++) {
+      if(dropdownArray[i].id == `dropdown-${this.com.id}`) {
+        dropdownArray[i].checked = false;
+      }
+    }
+
+    // Load the update comment component
     this.loadUpdateComment = !this.loadUpdateComment;
   }
 
   // Report the comment to the admin
   onReportComment() {
+    // we start by closing the menu
+    var dropdownCheckBox = document.getElementsByClassName("checkbox");
+    // transform dropdown to array
+    var dropdownArray = Array.prototype.slice.call(dropdownCheckBox);
+
+    for (var i = 0; i < dropdownArray.length; i++) {
+      if(dropdownArray[i].id == `dropdown-${this.com.id}`) {
+        dropdownArray[i].checked = false;
+      }
+    }
+
     this.CommentsService.reportAComment(this.com.id)
     .subscribe({
       next: (v) =>{
-        this.infoBox = {'infoMsg' : Object.values(v)}
+        this.infoBox = {'infoMsg' : Object.values(v), 'origin': 'comment', 'id': this.com.id}
 
         // Change the value in the local storage
         var storedCom = JSON.parse(localStorage.getItem(`post-${this.com.postId}`)!);
@@ -104,7 +129,7 @@ export class CommentComponent implements OnInit {
         this.com.isSignaled = true;
       },
       error: (e) => {
-        this.infoBox = {'errorMsg' : e.error.message}
+        this.infoBox = {'errorMsg' : e.error.message, 'origin': 'comment', 'id': this.com.id}
         this.ngOnInit()
       },
       complete: () => {
@@ -115,23 +140,45 @@ export class CommentComponent implements OnInit {
 
   // Delete the 'reported' status of the comment (only available for the admin)
   onUnreportComment() {
+    // we start by closing the menu
+    var dropdownCheckBox = document.getElementsByClassName("checkbox");
+    // transform dropdown to array
+    var dropdownArray = Array.prototype.slice.call(dropdownCheckBox);
+
+    for (var i = 0; i < dropdownArray.length; i++) {
+      if(dropdownArray[i].id == `dropdown-${this.com.id}`) {
+        dropdownArray[i].checked = false;
+      }
+    }
+
     this.CommentsService.unreportAComment(this.com.id)
     .subscribe({
       next: (v) => {
-        this.infoBox = {'infoMsg' : Object.values(v)}
+        this.infoBox = {'infoMsg' : Object.values(v), 'origin': 'comment', 'id': this.com.id}
 
-        // Change the value in the local storage
+        // Change the status (reported/unreported) of the com in the local storage
         var storedCom = JSON.parse(localStorage.getItem(`post-${this.com.postId}`)!);
-        var comFound = storedCom.Com.find((waldo: any) => waldo.id == this.com.id);
 
-        comFound.isSignaled = false;
+        if(storedCom){
+          var comFound = storedCom.Com.find((waldo: any) => waldo.id == this.com.id);
 
-        localStorage.setItem(`post-${this.com.postId}`, JSON.stringify(storedCom))
+          comFound.isSignaled = false;
+  
+          localStorage.setItem(`post-${this.com.postId}`, JSON.stringify(storedCom))
+  
+          this.com.isSignaled = false;
+        }
 
-        this.com.isSignaled = false;
+        // On the admin dashboard, when the status is switched to 'unreported' removes the comment from the list
+        if(this.router.url.includes('/admin')) {
+          document.getElementById(`com-${this.com.id}`)!.remove();
+          this.dataEmited.emit({message: 'comment removed'})
+        }
+          
+        
       },
       error: (e) => {
-        this.infoBox = {'errorMsg' : e.error.message}
+        this.infoBox = {'errorMsg' : e.error.message, 'origin': 'comment', 'id': this.com.id}
         this.ngOnInit()
       },
       complete: () => this.ngOnInit()
@@ -317,13 +364,12 @@ export class CommentComponent implements OnInit {
     if(eventData.message == 'comment updated') {
       this.loadUpdateComment = !this.loadUpdateComment;
       this.ngOnInit();
-      this.infoBox = {'infoMsg' : eventData.info, 'errorMsg' : eventData.error};
+      this.infoBox = {'infoMsg' : eventData.info, 'errorMsg' : eventData.error, 'origin': 'comment', 'id': this.com.id};
 
       (eventData.content != null)? this.com.content = eventData.content : null;
       (eventData.attachment != null)? this.com.attachment = eventData.attachment : null;
-    }
-
-    if(eventData.message == 'close update component') {
+      
+    } else if(eventData.message == 'close update component') {
       this.loadUpdateComment = !this.loadUpdateComment;
     }
   }

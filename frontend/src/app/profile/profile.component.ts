@@ -1,6 +1,7 @@
+import { Location } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { faChevronDown, faChevronLeft, faChevronRight, faChevronUp, faPenToSquare, faTrash, faUserGraduate, faUserSlash } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faChevronLeft, faChevronRight, faChevronUp, faLeftLong, faPenToSquare, faTrash, faUserGraduate, faUserSlash } from '@fortawesome/free-solid-svg-icons';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from '../services/users.service';
 
@@ -39,12 +40,14 @@ export class ProfileComponent implements OnInit {
   faChevronRight = faChevronRight;
   faChevronUp = faChevronUp;
   faChevronDown = faChevronDown;
+  faLeft = faLeftLong;
 
   constructor(
     private usersService: UsersService,
     private router: Router,
     private authService: AuthService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private location: Location
     ) { }
 
   ngOnInit(): void {
@@ -95,43 +98,63 @@ export class ProfileComponent implements OnInit {
         this.displayProfile = data
         this.loading = false;
       },
-      error: () => this.displayProfile = null,
+      error: () => {
+        this.displayProfile = null; 
+        this.loading = false;
+      },
     })
   }
 
   // Delete user
   deleteProfile(){
-    this.usersService.deleteProfile(this.displayProfile.id)
-    .subscribe({
-      next: (v) => console.log(v),
-      error: (e) => console.error(e),
-      complete: () =>  window.location.href="/"
-    })
+    if(confirm(`Voulez-vous vraiment supprimer le compte: ${this.displayProfile.username}?`)){
+      this.usersService.deleteProfile(this.displayProfile.id)
+      .subscribe({
+        next: (v) => console.log(v),
+        error: (e) => console.error(e),
+        complete: () =>  window.location.href="/"
+      })
+    }
   }
 
   // On click, loads/unloads the different child components (edit profile, posts)
   loadChildComponent(element: string) {
-    if (element === 'editProfile') {
-      this.loadEditProfile = !this.loadEditProfile;
+    switch(element) {
+      case 'editProfile':
+        var dropdownCheckBox = document.getElementsByClassName("checkbox");
+        // transform dropdown to array
+        var dropdownArray = Array.prototype.slice.call(dropdownCheckBox);
 
-    // The posts are stored in local storage (for 10 minutes or until refresh of the page) to avoid to load them again
-    } else if (element === 'loadPosts') {
-      if(this.loadPosts === false) {
-        var storedUserPosts = JSON.parse(localStorage.getItem(`user-${this.displayProfile.id}`)!);
+        for (var i = 0; i < dropdownArray.length; i++) {
+          if(dropdownArray[i].id == `chk-${this.displayProfile.id}`) {
+            dropdownArray[i].checked = false;
+          }
+        }
 
-        if (storedUserPosts) {
-          if (new Date() > storedUserPosts.ExpirationDate) {
-            this.refreshProfileCom()
+        this.loadEditProfile = !this.loadEditProfile;
+        break;
+      case 'loadPosts':
+        // The posts are stored in local storage (for 10 minutes or until refresh of the page) to avoid to load them again
+        if(this.loadPosts === false) {
+          var storedUserPosts = JSON.parse(localStorage.getItem(`user-${this.displayProfile.id}`)!);
+  
+          if (storedUserPosts) {
+            if (new Date() > storedUserPosts.ExpirationDate) {
+              this.refreshProfileCom()
+            } else {
+              this.userPosts = storedUserPosts.Com;
+              this.loadPosts = !this.loadPosts;
+            }
           } else {
-            this.userPosts = storedUserPosts.Com;
-            this.loadPosts = !this.loadPosts;
+            this.refreshProfileCom()
           }
         } else {
-          this.refreshProfileCom()
+          this.loadPosts = !this.loadPosts;
         }
-      } else {
-        this.loadPosts = !this.loadPosts;
-      }
+        break;
+      default:
+        console.log('Error');
+        break;
     }
   }
 
@@ -155,11 +178,6 @@ export class ProfileComponent implements OnInit {
       },
       error: (e) => console.error(e),
     })
-  }
-
-  // If the user is not logged in, redirect to the login page
-  onToLogin(): void {
-    this.router.navigateByUrl('login');
   }
 
   // Grants admin rights to the user (only available to admins)
@@ -189,13 +207,28 @@ export class ProfileComponent implements OnInit {
   triggeredFromChildren(eventData: any) {
     if(eventData.message == 'profile updated') {
       this.loadEditProfile = !this.loadEditProfile;
-      this.ngOnInit();
-      this.infoBox = {'infoMsg' : eventData.infoMsg, 'errorMsg' : eventData.errorMsg};
+      this.infoBox = {'infoMsg' : eventData.infoMsg, 'errorMsg' : eventData.errorMsg, 'origin': 'profile', 'id': this.displayProfile.id};
 
       (eventData.username!= null)? this.displayProfile.username = eventData.username : null;
       (eventData.email!= null)? this.displayProfile.email = eventData.email : null;
       (eventData.bio!= null)? this.displayProfile.bio = eventData.bio : null;
       (eventData.avatar!= null)? this.displayProfile.avatar = eventData.avatar : null;
+
+      if(eventData.action == 'logout') {
+        this.authService.logout()
+        .subscribe({
+          next: (v) => console.log(v),
+          error: (e) =>  this.infoBox = {'errorMsg' : e.error.message, 'origin': 'profile', 'id': this.displayProfile.id},
+          complete: () => window.location.href="/login"  
+        })
+      }
+    } else if (eventData.message == 'close update profile') {
+      this.loadEditProfile = !this.loadEditProfile;
     }
+  }
+
+  // Redirects the user to the previous page
+  goBack(){
+    this.location.back();
   }
 }

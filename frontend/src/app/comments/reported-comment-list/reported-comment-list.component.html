@@ -5,10 +5,10 @@
     <app-comment *ngFor="let comment of comments" [com]="comment" (dataEmited)="triggeredFromChildren($event)"></app-comment> 
     <div class="button-container">
         <button 
-                *ngIf="comments && totalComments && comments.length<totalComments" 
-                (click)="loadMoreComs()"
+                *ngIf="comments && totalComments && (comments.length<totalComments)" 
+                (click)="loadMoreReportedComs()"
                 class="btn">
-                Voir plus
+                Afficher plus de commentaires
         </button>
     </div>
 </ng-template>

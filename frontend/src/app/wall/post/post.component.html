@@ -1,7 +1,8 @@
+<!-- Loading spinner -->
 <app-loading *ngIf="loading; else loaded"></app-loading>
 
 <ng-template #loaded>
-    <div class="card container">
+    <div class="card container" id="post-{{ post.id }}">
         <section id="points" class="points">
             <div class="points__container points__container--col">
                 <button [ngStyle]="(post.Likes && findRightUser(post.Likes) == 'like')? {'color': 'green'} : {}" id="like-{{ post.id }}" type="submit" (click)="onLikePost()">
@@ -39,8 +40,8 @@
                 </div>
 
                 <div class="main__content__check-container">
-                    <input type="checkbox" id="{{ post.id }}" class="checkbox"> 
-                    <label for="{{ post.id }}" class="checkbox__label" [ngClass]="((userId == post.User.id) || isAdmin) ? 'l-fit' : 's-fit'">
+                    <input type="checkbox" id="chk-{{ post.id }}" class="checkbox"> 
+                    <label for="chk-{{ post.id }}" class="checkbox__label" [ngClass]="((userId == post.User.id) || isAdmin) ? 'l-fit' : 's-fit'">
                         <div class="checkbox__label__icons">
                             <fa-icon [icon]="faChevronLeft" class="left-arrow"></fa-icon>
                             <fa-icon [icon]="faChevronRight" class="right-arrow"></fa-icon>
@@ -82,11 +83,12 @@
                 <app-update-a-post *ngIf="loadEditPost" [post]="post" (postUpdated)="triggeredFromChildren($event)" class="main__content__edit-post-container"></app-update-a-post>
             </div>
             <footer class="main__footer">
-                <div *ngIf="post.Comments.length < 1; else comms">
+                <div *ngIf="!tempTotalCom && (post.Comments.length < 1); else comms">
                     <span>Pas de commentaire</span>
                 </div>
                 <ng-template #comms>
-                    <button class="btn--small" (click)="loadChildComponent('loadComments')">
+                    <span *ngIf="tempTotalCom== 0">Pas de commentaire</span>
+                    <button *ngIf="tempTotalCom!= 0" class="btn--small" (click)="loadChildComponent('loadComments')">
                         <fa-icon [icon]="faMessage"></fa-icon> 
                         {{ tempTotalCom ? tempTotalCom : post.Comments.length }} Commentaires
                     </button>
@@ -95,15 +97,15 @@
                 
                 <button class="btn--small" (click)="loadChildComponent('loadCreateComment')">Commenter le post</button>
             </footer>
-            <app-info-box [infoBox]="infoBox"></app-info-box>
+            <app-info-box *ngIf="infoBox.errorMsg || infoBox.infoMsg" [infoBox]="infoBox" class="infoBox"></app-info-box>
             
-                <app-create-a-comment *ngIf="loadCreateComment" [post]="post" (comCreated)="triggeredFromChildren($event)"></app-create-a-comment>
+            <app-create-a-comment *ngIf="loadCreateComment" [post]="post" (comCreated)="triggeredFromChildren($event)"></app-create-a-comment>
 
-                <div *ngIf="loadComments" class="main__comments-container">
-                    <app-comment *ngFor="let comment of comments" [com]="comment" class="main__comments-container__cards"></app-comment>
-                </div>
+            <div *ngIf="loadComments" class="main__comments-container">
+                <app-comment-list [infoFromPost]="infoToComment" class="main__comments-container__cards" (commentListEvent)="triggeredFromChildren($event)"></app-comment-list>
+            </div>
 
-                <app-create-a-comment *ngIf="loadComments && !loadCreateComment" [post]="post" (comCreated)="triggeredFromChildren($event)"></app-create-a-comment>
+            <app-create-a-comment *ngIf="loadComments && !loadCreateComment" [post]="post" (comCreated)="triggeredFromChildren($event)"></app-create-a-comment>
         </main>
     </div>
 </ng-template>

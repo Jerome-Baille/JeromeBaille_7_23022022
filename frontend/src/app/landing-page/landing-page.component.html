@@ -34,6 +34,7 @@
 
       <div class="form-group__buttons">
         <button class="btn" *ngIf="userId" (click)="onContinue()">Continuer vers Groupomania</button>
+        <button class="btn" *ngIf="!userId" (click)="onToLogin()">Se connecter</button>
       </div>
     </main>
   </div>

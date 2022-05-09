@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Post } from 'src/app/models/blog.model';
+import { Post } from 'src/app/models/post.model';
 
 @Component({
   selector: 'app-most-popular',

@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Comment } from '../models/blog.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,8 +22,8 @@ export class CommentsService {
   }
 
   // Read
-  getPostComments(postId: number): Observable<Comment[]> {
-    return this.http.get<Comment[]>(`http://localhost:3000/api/comments/post/${postId}`, {withCredentials: true});
+  getPostComments(postId: number, fields: string, limit: string, offset: any, order: string): Observable<Comment[]> {
+    return this.http.get<Comment[]>(`http://localhost:3000/api/comments/post/${postId}?fields=${fields}&limit=${limit}&offset=${offset}&order=${order}`, {withCredentials: true});
   }
 
   getOneComment(commentId: number) {

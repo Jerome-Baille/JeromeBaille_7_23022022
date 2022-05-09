@@ -1,110 +1,115 @@
 <!-- Loading spinner -->
-<div *ngIf="loading; else loaded" class="loading-spinner">
-    <div>
-        <div class="loading-spinner__circle"></div>
-        <p class="loading-spinner__text">Chargement</p>
-    </div>
-</div>
+<app-loading *ngIf="loading; else loaded"></app-loading>
 
 <ng-template #loaded>
-    <section class="container-info-box">
-        <app-info-box [infoBox]="infoBox"></app-info-box>
-    </section>
-
-    <div class="card container container--single">
-        <section id="points" class="points">
-            <div class="points__container points__container--col">
-                <button [ngStyle]="(post.Likes && findRightUser(post.Likes) == 'like')? {'color': 'green'} : {}" id="like-{{ post.id }}" type="submit" (click)="onLikePost()">
-                    <fa-icon [icon]="faCircleUp"></fa-icon>
-                </button>
-                <span id="points-{{ post.id }}">{{ post.points }}</span>
-                <button [ngStyle]="(post.Likes && findRightUser(post.Likes) == 'dislike')? {'color': 'darkred'} : {}" id="dislike-{{ post.id }}" type="submit" (click)="onDislikePost()">
-                    <fa-icon [icon]="faCircleDown"></fa-icon>
-                </button>
-            </div>
-        </section>
-        <main class="main">
-            <header class="main__header">
-                <a class="main__back-link" routerLink="/wall">
-                    <fa-icon [icon]="faLeft"></fa-icon>
-                    <span> Retour</span>
-                </a>
-                <p class="main__header__text">
-                    Publié par 
-                    <a class="main__header__user-link" routerLink="/profil/{{post.User.id}}">{{ post.User.username }}</a> 
-                    le {{ post.createdAt | date: 'd MMMM yyy, à HH:mm' }}
-                </p>
-            </header>
-            <div id="body" class="main__content">
-                <div class="main__content__container main__content__container--col">
-                    <h2 *ngIf="post.title" class="main__content__container__text main__content__container__text--center">{{ post.title | titlecase }}</h2>
-                    <img class="main__content__container__img" *ngIf="post.attachment" [src]="post.attachment" [alt]="post.title"> <!-- Attribute binding-->
-                    <p class="main__content__container__text main__content__container__text--center">{{ post.content }}</p>
-                </div>
-    
-                <div class="main__content__check-container">
-                    <input type="checkbox" id="{{ post.id }}" class="checkbox"> 
-                    <label for="{{ post.id }}" class="checkbox__label" [ngClass]="((userId == post.User.id) || isAdmin) ? 'l-fit' : 's-fit'">
-                        <div class="checkbox__label__icons">
-                            <fa-icon [icon]="faChevronLeft" class="left-arrow"></fa-icon>
-                            <fa-icon [icon]="faChevronRight" class="right-arrow"></fa-icon>
-                        </div>
-                    </label>          
-                    <div class="main__content__options">
-                        <button class="btn-noBg" *ngIf="userId == post.User.id || isAdmin" (click)="loadChildComponent('loadEditPost')">
-                            <div class="btn-col">
-                                <fa-icon [icon]="faPenToSquare" class="faPenToSquare"></fa-icon>
-                                <p>Editer</p>
-                            </div>
-                        </button>
-                    
-                        <button class="btn-noBg" *ngIf="userId == post.User.id || isAdmin" (click)="onDeletePost()">
-                            <div class="btn-col">
-                                <fa-icon [icon]="faTrash" class="faTrash"></fa-icon>
-                                <p>Supprimer</p>
-                            </div>
-                        </button>
-    
-                        <div *ngIf="post.isSignaled && isAdmin; else report">
-                            <button class="btn-noBg" (click)="onUnreportPost()">
-                                <div class="btn-col">
-                                    <fa-icon [icon]="faThumbsUp" class="faThumbsUp"></fa-icon>
-                                    <p>Valider</p>
-                                </div>
-                            </button>
-                        </div>
-                        <ng-template #report>
-                            <button class="btn-noBg" (click)="onReportPost()">
-                                <div class="btn-col">
-                                    <fa-icon [icon]="faCircleExclamation" class="faCircleExclamation"></fa-icon>
-                                    <p>Signaler</p>
-                                </div>
-                            </button>
-                        </ng-template>
-                    </div>
-                </div> 
-    
-                <app-update-a-post *ngIf="loadEditPost" [post]="post" class="main__content__edit-post-container" (postUpdated)="triggeredFromChildren($event)"></app-update-a-post>
-            </div>
-            <footer class="main__footer">
-                <div *ngIf="post.Comments.length < 1; else comms">
-                    <span>Pas de commentaire</span>
-                </div>
-                <ng-template #comms>
-                    <button class="btn--small" (click)="loadChildComponent('loadComments')">
-                        <fa-icon [icon]="faMessage"></fa-icon> 
-                        {{ post.Comments.length }} Commentaires
+    <div *ngIf="userId">
+        <div *ngIf="post!= undefined; else inexistant" class="card container container--single">
+            <section id="points" class="points">
+                <div class="points__container points__container--col">
+                    <button [ngStyle]="(post.Likes && findRightUser(post.Likes) == 'like')? {'color': 'green'} : {}" id="like-{{ post.id }}" type="submit" (click)="onLikePost()">
+                        <fa-icon [icon]="faCircleUp"></fa-icon>
                     </button>
-                </ng-template>
-    
-                
-                <button class="btn--small" (click)="loadChildComponent('loadCreateComment')">Commenter le post</button>
-            </footer>
-                <app-create-a-comment *ngIf="loadCreateComment" [post]="post" (comCreated)="triggeredFromCreateComment($event)"></app-create-a-comment>
-    
-                <div *ngIf="loadComments" class="main__comments-container">
-                    <app-comment *ngFor="let comment of comments" [com]="comment" class="main__comments-container__cards" (dataEmited)="triggeredFromComment($event)"></app-comment>
+                    <span id="points-{{ post.id }}">{{ post.points }}</span>
+                    <button [ngStyle]="(post.Likes && findRightUser(post.Likes) == 'dislike')? {'color': 'darkred'} : {}" id="dislike-{{ post.id }}" type="submit" (click)="onDislikePost()">
+                        <fa-icon [icon]="faCircleDown"></fa-icon>
+                    </button>
                 </div>
-        </main>
+            </section>
+            <main class="main">
+                <header class="main__header">
+                    <a class="main__back-link" (click)="goBack()">
+                        <fa-icon [icon]="faLeft"></fa-icon>
+                        <span> Retour</span>
+                    </a>
+                    <p class="main__header__text">
+                        Publié par 
+                        <a class="main__header__user-link" routerLink="/profil/{{post.User.id}}">{{ post.User.username }}</a> 
+                        le {{ post.createdAt | date: 'd MMMM yyy, à HH:mm' }}
+                    </p>
+                </header>
+                <div id="body" class="main__content">
+                    <div class="main__content__container main__content__container--col">
+                        <h2 *ngIf="post.title" class="main__content__container__text main__content__container__text--center">{{ post.title | titlecase }}</h2>
+                        <img class="main__content__container__img" *ngIf="post.attachment" [src]="post.attachment" [alt]="post.title"> <!-- Attribute binding-->
+                        <p class="main__content__container__text main__content__container__text--center">{{ post.content }}</p>
+                    </div>
+
+                    <section class="container-info-box">
+                        <app-info-box [infoBox]="infoBox"></app-info-box>
+                    </section>
+        
+                    <div class="main__content__check-container">
+                        <input type="checkbox" id="chk-{{ post.id }}" class="checkbox"> 
+                        <label for="chk-{{ post.id }}" class="checkbox__label" [ngClass]="((userId == post.User.id) || isAdmin) ? 'l-fit' : 's-fit'">
+                            <div class="checkbox__label__icons">
+                                <fa-icon [icon]="faChevronLeft" class="left-arrow"></fa-icon>
+                                <fa-icon [icon]="faChevronRight" class="right-arrow"></fa-icon>
+                            </div>
+                        </label>          
+                        <div class="main__content__options">
+                            <button class="btn-noBg" *ngIf="userId == post.User.id || isAdmin" (click)="loadChildComponent('loadEditPost')">
+                                <div class="btn-col">
+                                    <fa-icon [icon]="faPenToSquare" class="faPenToSquare"></fa-icon>
+                                    <p>Editer</p>
+                                </div>
+                            </button>
+                        
+                            <button class="btn-noBg" *ngIf="userId == post.User.id || isAdmin" (click)="onDeletePost()">
+                                <div class="btn-col">
+                                    <fa-icon [icon]="faTrash" class="faTrash"></fa-icon>
+                                    <p>Supprimer</p>
+                                </div>
+                            </button>
+        
+                            <div *ngIf="post.isSignaled && isAdmin; else report">
+                                <button class="btn-noBg" (click)="onUnreportPost()">
+                                    <div class="btn-col">
+                                        <fa-icon [icon]="faThumbsUp" class="faThumbsUp"></fa-icon>
+                                        <p>Valider</p>
+                                    </div>
+                                </button>
+                            </div>
+                            <ng-template #report>
+                                <button class="btn-noBg" (click)="onReportPost()">
+                                    <div class="btn-col">
+                                        <fa-icon [icon]="faCircleExclamation" class="faCircleExclamation"></fa-icon>
+                                        <p>Signaler</p>
+                                    </div>
+                                </button>
+                            </ng-template>
+                        </div>
+                    </div> 
+        
+                    <app-update-a-post *ngIf="loadEditPost" [post]="post" class="main__content__edit-post-container" (postUpdated)="triggeredFromChildren($event)"></app-update-a-post>
+                </div>
+                <footer class="main__footer">
+                    <div *ngIf="post.Comments.length < 1; else comms">
+                        <span>Pas de commentaire</span>
+                    </div>
+                    <ng-template #comms>
+                        <button class="btn--small" (click)="loadChildComponent('loadComments')">
+                            <fa-icon [icon]="faMessage"></fa-icon> 
+                            {{ post.Comments.length }} Commentaires
+                        </button>
+                    </ng-template>
+        
+                    
+                    <button class="btn--small" (click)="loadChildComponent('loadCreateComment')">Commenter le post</button>
+                </footer>
+                    <app-create-a-comment *ngIf="loadCreateComment" [post]="post" (comCreated)="triggeredFromChildren($event)"></app-create-a-comment>
+        
+                    <div *ngIf="loadComments" class="main__comments-container">
+                        <app-comment-list [infoFromPost]="infoToComment" class="main__comments-container__cards"></app-comment-list>
+                    </div>
+            </main>
+        </div>
+
+        <ng-template #inexistant>
+            <div class="card card--denied">
+                <h2>La page demandé n'existe pas</h2>
+            </div>
+        </ng-template>  
     </div>
 </ng-template>
+
+<app-is-not-logged *ngIf="!userId"></app-is-not-logged>

@@ -32,4 +32,8 @@ export class LandingPageComponent implements OnInit {
   onContinue(): void {
     this.router.navigateByUrl('wall');
   }
+
+  onToLogin(): void {
+    this.router.navigateByUrl('login');
+  }
 }

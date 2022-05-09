@@ -1,7 +1,8 @@
+<!-- Loading spinner -->
 <app-loading *ngIf="loading; else loaded"></app-loading>
 
 <ng-template #loaded>
-  <div *ngIf="isAdmin; else denied" class="dashboard-container">
+  <div *ngIf="isAdmin" class="dashboard-container">
     <header class="dashboard-container__card">
         <h2>Admin Dashboard</h2>
     </header>
@@ -36,7 +37,7 @@
             <button class="btn" type="submit" (click)="onSubmitForm()" [disabled]="userForm.invalid">Submit</button>
           </form>         
     
-          <app-info-box *ngIf="userInfoBox" [infoBox]="infoBox"></app-info-box>
+          <app-info-box [infoBox]="infoBox"></app-info-box>
 
           <div class="selected-user" *ngIf="displayProfile!= 0">
             <app-profile *ngIf="displayProfile" [displayProfile]="displayProfile"></app-profile>
@@ -61,7 +62,7 @@
             <p *ngIf="posts.length != 1">Vous avez {{ posts.length }} messages signalés, cliquez pour les voir</p>
           </label>
           <div class="tab-content" >
-              <app-reported-post-list class="reported-msg" [totalPosts]="posts.length"></app-reported-post-list>
+              <app-reported-post-list class="reported-msg" [infoFromDashboard]="infoToPost" (reportedPostListEvent)="triggeredFromChildren($event)"></app-reported-post-list>
           </div>
         </div>
       </ng-template>
@@ -82,17 +83,12 @@
               <p *ngIf="comments.length != 1">Vous avez {{ comments.length }} commentaires signalés, cliquez pour les voir</p>
             </label>
           <div class="tab-content" >
-            <app-comment-list [totalComments]="comments.length"></app-comment-list>
+            <app-reported-comment-list [infoFromDashboard]="infoToComment" (reportedCommentListEvent)="triggeredFromChildren($event)"></app-reported-comment-list>
           </div>
         </div>
       </ng-template>
     </div>
   </div>
 
-  <ng-template #denied>
-    <div class="card card--denied">
-      <h2>Veuillez vous connecter pour accéder à cette page</h2>
-      <button class="btn" (click)="onToLogin()">Se connecter</button>
-    </div>
-  </ng-template>
+  <app-is-not-logged *ngIf="!isAdmin"></app-is-not-logged>
 </ng-template>

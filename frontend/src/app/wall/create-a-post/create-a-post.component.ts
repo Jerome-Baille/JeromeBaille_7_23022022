@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { faPaperclip } from '@fortawesome/free-solid-svg-icons';
-import { Post, User } from 'src/app/models/blog.model';
+import { faCircleXmark, faImage, faPaperclip } from '@fortawesome/free-solid-svg-icons';
 import { AuthService } from 'src/app/services/auth.service';
 import { UsersService } from 'src/app/services/users.service';
 import { PostsService } from '../../services/posts.service';
@@ -26,24 +25,28 @@ export class CreateAPostComponent implements OnInit {
   selectedFile!: File;
   postForm!: FormGroup;
   extentionRegEx!: RegExp;
-  errorType: boolean = false;
+  errorAttachment: boolean = true;
+  imgHelperBoolean: boolean = false;
 
   // Info variables (success, error, loading)
   infoBox: any = {};
+  loading: boolean = true;
 
   // FontAwesome Icons
   faPaperclip = faPaperclip;
+  faImage = faImage;
+  faCircleXmark = faCircleXmark;
 
   constructor(
     private PostsService: PostsService,
     private authService: AuthService,
     private formBuilder: FormBuilder,
-    private usersService: UsersService,
-    private router: Router,
-    private http: HttpClient
+    private usersService: UsersService
   ) { }
 
   ngOnInit(): void {
+    this.loading = true;
+
     // Get current user id and role (admin or not)
     this.authService.checkIsAuth()
     .then((v) => {
@@ -53,16 +56,19 @@ export class CreateAPostComponent implements OnInit {
       })
     .catch((e) => {
         this.isAuth = null
+        this.loading = false;
     })
 
     // Set extention RegEx
-    this.extentionRegEx = /^png|jpe?g|webp|gif$/;
+    this.extentionRegEx = /png|jpeg|webp|gif/;
 
     this.postForm = this.formBuilder.group({
       title: [null],
       content: [null],
       attachment: [null]
     })
+
+    this.loading = false;
   }
 
   // Get current user infos
@@ -76,19 +82,26 @@ export class CreateAPostComponent implements OnInit {
 
   // Detects if the user has selected a file
   onFileSelected(event: any) {
+    const target = event.target.files[0];
+
+    // Check if the size of the file is greater than 5MB
+    if (target.size>= 1024*1024*5){
+      this.infoBox = {'errorMsg' : `La taille de l'image est trop grande`, 'origin': 'createPost', 'id': 1}
+      this.errorAttachment = true;
     // check if the extention is valid
-    if (event.target.files[0].type.match(this.extentionRegEx)) {
-      const file = event.target.files[0];
-      this.postForm.get('attachment')!.setValue(file);
+    } else if (target.type.match(this.extentionRegEx)) {
+      this.postForm.get('attachment')!.setValue(target);
       this.postForm.updateValueAndValidity();
       const reader = new FileReader();
+      this.errorAttachment = false;
       // reader.onload = () => {
       //   this.imagePreview = reader.result as File;
       // };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(target);
+    // Display an error message if the extention is not valid
     } else {
-      this.infoBox = {'errorMsg' : 'Type de fichier invalide'}
-      this.errorType = true;
+      this.infoBox = {'errorMsg' : 'Type de fichier invalide', 'origin': 'createPost', 'id': 1}
+      this.errorAttachment = true;
     }
   }
 
@@ -97,15 +110,28 @@ export class CreateAPostComponent implements OnInit {
     var { title, content } = this.postForm.value;
     var attachment = this.postForm.get('attachment')!.value;
 
-    if(this.errorType = true){
-      window.location.reload();
-    }
-
     this.PostsService.createAPost(title, content, attachment)
     .subscribe({
       next: (v) => console.log(v),
-      error: (e) => this.infoBox = {'errorMsg' : e.error.message},
+      error: (e) => this.infoBox = {'errorMsg' : e.error.message, 'origin': 'createPost', 'id': 1},
       complete: () => window.location.reload()
     })
+  }
+
+  imgHelper(status: boolean){
+    this.imgHelperBoolean = status
+  }
+
+  clearAttachmentInput() {
+    // get element fileinput by its id
+    const fileInput = document.getElementById('attachment') as HTMLInputElement;
+    // reset file input
+    fileInput.value = '';
+
+    // clear the value of the form
+    this.postForm.get('attachment')!.setValue(null);
+    this.postForm.updateValueAndValidity();
+
+    this.errorAttachment = true;
   }
 }

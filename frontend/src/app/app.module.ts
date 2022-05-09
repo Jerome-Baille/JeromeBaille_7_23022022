@@ -30,6 +30,8 @@ import { AuthGuardInterceptor } from './auth-guard.interceptor';
 import { FilterPipe } from './filter.pipe';
 import { ReportedPostListComponent } from './wall/reported-post-list/reported-post-list.component';
 import { CommentListComponent } from './comments/comment-list/comment-list.component';
+import { ReportedCommentListComponent } from './comments/reported-comment-list/reported-comment-list.component';
+import { IsNotLoggedComponent } from './is-not-logged/is-not-logged.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +57,8 @@ import { CommentListComponent } from './comments/comment-list/comment-list.compo
     FilterPipe,
     ReportedPostListComponent,
     CommentListComponent,
+    ReportedCommentListComponent,
+    IsNotLoggedComponent,
   ],
   imports: [
     BrowserModule,

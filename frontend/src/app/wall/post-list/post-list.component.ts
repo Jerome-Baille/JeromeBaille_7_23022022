@@ -1,7 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { faArrowTrendUp, faCircleXmark, faRocket } from '@fortawesome/free-solid-svg-icons';
-import { map } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { PostsService } from '../../services/posts.service';
 
@@ -35,8 +34,7 @@ export class PostListComponent implements OnInit {
 
   constructor(
     private postsService: PostsService,
-    private authService: AuthService,
-    private router: Router
+    private authService: AuthService
     ) {}
 
   ngOnInit(): void {
@@ -123,11 +121,6 @@ export class PostListComponent implements OnInit {
           error: (e) => console.log(e),
         })
     }
-  }
-
-// Redirect to login page
-  onToLogin(): void {
-    this.router.navigateByUrl('login');
   }
 
   // Scroll to the top of the page on click

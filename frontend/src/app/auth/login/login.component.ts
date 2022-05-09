@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { faCircleCheck, faCircleXmark, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -29,8 +28,7 @@ export class LoginComponent implements OnInit {
   faEyeSlash = faEyeSlash;
 
   constructor(private authService: AuthService,
-              private formBuilder: FormBuilder,
-              private router: Router
+              private formBuilder: FormBuilder
               ) { }
 
   ngOnInit(): void {
@@ -69,7 +67,7 @@ export class LoginComponent implements OnInit {
       // this.router.navigateByUrl('wall');
     })
     .catch((error) => {
-      this.infoBox = {'errorMsg' : error.error.message}
+      this.infoBox = {'errorMsg' : error.error.message, 'origin': 'login', 'id': 1}
     });
   }
 
@@ -78,7 +76,7 @@ export class LoginComponent implements OnInit {
     this.authService.logout()
     .subscribe({
       next: (v) => console.log(v),
-      error: (e) =>  this.infoBox = {'errorMsg' : e.error.message},
+      error: (e) =>  this.infoBox = {'errorMsg' : e.error.message, 'origin': 'logout', 'id': 1},
       complete: () => window.location.reload()   
     })
   }

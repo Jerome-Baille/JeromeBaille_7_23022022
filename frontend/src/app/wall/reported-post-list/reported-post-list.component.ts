@@ -1,6 +1,4 @@
-import { Component, HostListener, Input, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from 'src/app/services/auth.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { PostsService } from 'src/app/services/posts.service';
 
 @Component({
@@ -9,51 +7,38 @@ import { PostsService } from 'src/app/services/posts.service';
   styleUrls: ['./reported-post-list.component.scss']
 })
 export class ReportedPostListComponent implements OnInit {
-  @Input() totalPosts!: number;
+  // Get the main infos (total posts, user id and role of the user) from the dashboard
+  @Input() infoFromDashboard: any = {};
+
+  @Output() reportedPostListEvent: EventEmitter<any> = new EventEmitter<any>();
+
   // Get current user id and role (admin or not)
   userId!: any;
   isAdmin: boolean = false;
-  isAuth: any = [];
 
   // Main data variables
-  topPosts!: any;
   posts!: any;
+  totalPosts!: number;
 
   // Info variables (loading)
   loading: boolean = true;
 
-  windowScrolled = false;
-
   constructor(
     private postsService: PostsService,
-    private authService: AuthService,
-    private router: Router
   ) { }
 
   ngOnInit(): void {
     this.loading = true;
 
-    // Get current user id and role (admin or not)
-    this.authService.checkIsAuth()
-    .then((v) => {
-        this.isAuth = v
-        this.userId = this.isAuth.userId;
-        this.isAdmin = this.isAuth.isAdmin;
-      })
-    .then(() => {
-      // remove from local storage all keys starting with post-
-      var keys = Object.keys(localStorage).filter(k => k.startsWith('post-'));
-      keys.forEach(k => localStorage.removeItem(k));
-    })
-    .then(() => {
-      // Load 5 first reported posts
-      this.loadReportedPosts();
-      this.loading = false;
-    })
-    .catch((e) => {
-        this.isAuth = null
-        this.loading = false;
-    })
+    // Get the main infos (total comments, user id and role of the user) from the dashboard
+    this.totalPosts = this.infoFromDashboard.totalPosts
+    this.userId = this.infoFromDashboard.userId;
+    this.isAdmin = this.infoFromDashboard.isAdmin;
+
+    // Load 5 first reported posts
+    this.loadReportedPosts();
+
+    this.loading = false;
   }
 
   // Get 5 reported posts
@@ -89,5 +74,15 @@ export class ReportedPostListComponent implements OnInit {
       },
       error: (e) => console.log(e),
     })
+  }
+
+  triggeredFromChildren(eventData: any) {
+    switch (eventData.message) {
+      case 'post removed':
+        this.reportedPostListEvent.emit(eventData);
+        this.totalPosts--;
+        this.posts.length--;
+        break;
+    }
   }
 }

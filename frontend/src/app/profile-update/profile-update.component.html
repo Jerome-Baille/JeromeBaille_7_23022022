@@ -1,41 +1,66 @@
-<div class="card container">
-    <main class="main main--center">
-        <form [formGroup]="usersForm">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input id="username" type="text" formControlName="username" placeholder="{{ displayProfile.username }}">
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" type="email" formControlName="email" placeholder="{{ displayProfile.email }}">
-            </div>
-            <div class="form-group">
-                <label for="bio">Bio</label>
-                <textarea class="form-group__textarea" id="bio" type="text" formControlName="bio" rows="4" placeholder="{{ displayProfile.bio }}">
-                </textarea>
-            </div>
-            <div class="form-group">
-                <label for="avatar"></label>
-                <input id="avatar" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
-                <div class="form-group__img-manager">
-                  {{fileUpload.value || 'Aucun fichier séléctionné'}}
-      
-                  <button (click)="fileUpload.click()">
-                    <fa-icon [icon]="faPaperclip"></fa-icon> 
-                  </button>
-                  <button *ngIf="displayProfile.avatar" type="submit" (click)="onDelPicture()">
-                    <fa-icon [icon]="faTrashCan"></fa-icon>
-                  </button>
+<!-- Loading spinner -->
+<app-loading *ngIf="loading; else loaded"></app-loading>
+
+<ng-template #loaded>
+    <div class="card container">
+        <main class="main main--center">
+            <section class="btn--close">
+                <button>
+                    <fa-icon [icon]="faCircleXmark" (click)="close()"></fa-icon>
+                </button>
+            </section>
+            <form [formGroup]="usersForm">
+                <div class="form-group">
+                    <label for="username">Pseudo</label>
+                    <input id="username" type="text" formControlName="username" placeholder="{{ displayProfile.username }}">
                 </div>
-            </div>
-            <div class="form-group">
-                <label for="password">Password </label>
-                <input id="password" type="password" formControlName="password">
-            </div>
-            <div class="form-group__buttons">
-                <button class="btn" type="submit" (click)="onSubmitForm()">Enregistrer</button>
-            </div>
-            <app-info-box [infoBox]="infoBox"></app-info-box>
-        </form>        
-    </main>
-</div>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input id="email" type="email" formControlName="email" placeholder="{{ displayProfile.email }}">
+                </div>
+                <span *ngIf="(usersForm.controls['email'].invalid)" class="helperContainer">L'adresse e-mail saisie doit être au format "adresse@exemple.com"</span>
+                <div class="form-group">
+                    <label for="bio">Bio</label>
+                    <textarea class="form-group__textarea" id="bio" type="text" formControlName="bio" rows="4" placeholder="{{ displayProfile.bio }}">
+                    </textarea>
+                </div>
+                <div class="form-group">
+                    <label for="avatar"></label>
+                    <input id="avatar" type="file" (change)="onFileSelected($event)" #fileUpload style="display: none;">
+                    <div class="form-group__img-manager">
+                    {{fileUpload.value || 'Aucun fichier séléctionné'}}
+        
+                    <button class="btn--small" (click)="fileUpload.click()">
+                        <fa-icon [icon]="faImage"></fa-icon> 
+                    </button>
+                    </div>
+                    <button *ngIf="fileUpload.value" class="btn--small" (click)="clearAttachmentInput()">
+                        <fa-icon [icon]="faCircleXmark"></fa-icon>
+                    </button>
+                </div>
+
+                <button *ngIf="displayProfile.avatar" type="submit" class="btn--small" (click)="onDelPicture()">
+                    <fa-icon [icon]="faTrashCan"></fa-icon>
+                    Supprimer l'image actuelle
+                </button>
+
+                <div class="form-group form-group--pos-relative">
+                    <label for="password">Mot de passe </label>
+                    <input id="password" [type]="visiblePassword? 'text' : 'password'" formControlName="password" placeholder="Mot de passe">
+                    <fa-icon class="passwordEyeIcon" [icon]="visiblePassword? faEye : faEyeSlash" (click)="toggleVisibility()"></fa-icon>
+                </div>
+                <div *ngIf="(usersForm.controls['password'].invalid)"  class="helperContainer">
+                    <span>Votre mot de passe doit contenir :</span>
+                    <span class="helperContainer__text">- au moins 8 caractères</span>
+                    <span class="helperContainer__text">- une majuscule</span>
+                    <span class="helperContainer__text">- une minuscule</span>
+                    <span class="helperContainer__text">- un chiffre</span>
+                </div>
+                <div class="form-group__buttons">
+                    <button class="btn" type="submit" (click)="onSubmitForm()" [disabled]="usersForm.invalid">Enregistrer</button>
+                </div>
+                <app-info-box [infoBox]="infoBox"></app-info-box>
+            </form>        
+        </main>
+    </div>
+</ng-template>

@@ -1,7 +1,8 @@
+<!-- Loading spinner -->
 <app-loading *ngIf="loading; else loaded"></app-loading>
 
 <ng-template #loaded>
-    <div *ngIf="userId; else denied">
+    <div *ngIf="userId">
         <div *ngIf="displayProfile!= null; else inexistant" class="card container container--single">
             <main class="main">
                 <header class="main__header main__header--center">
@@ -9,6 +10,10 @@
                         Profil de 
                         <span class="main__header__user-link">{{ displayProfile.username }}</span>
                     </h2>
+                    <a class="main__back-link main__back-link--profile" (click)="goBack()">
+                        <fa-icon [icon]="faLeft"></fa-icon>
+                        <span> Retour</span>
+                    </a>
                 </header>
         
                 <section class="main__content">
@@ -82,8 +87,8 @@
                 </section>
 
                 <section class="main__content__check-container" *ngIf="displayProfile.id == userId || isAdmin">
-                    <input type="checkbox" id="{{ displayProfile.id }}" class="checkbox"> 
-                    <label for="{{ displayProfile.id }}" class="checkbox__label" [ngClass]="(isAdmin) ? 'xl-fit' : 'm-fit'">
+                    <input type="checkbox" id="chk-{{ displayProfile.id }}" class="checkbox"> 
+                    <label for="chk-{{ displayProfile.id }}" class="checkbox__label" [ngClass]="(isAdmin) ? 'xl-fit' : 'm-fit'">
                         <div class="checkbox__label__icons">
                             <fa-icon [icon]="faChevronLeft" class="left-arrow"></fa-icon>
                             <fa-icon [icon]="faChevronRight" class="right-arrow"></fa-icon>
@@ -139,11 +144,4 @@
     </div>
 </ng-template>
 
-
-
-<ng-template #denied>
-    <div class="card card--denied">
-        <h2>Veuillez vous connecter pour accéder à cette page</h2>
-        <button class="btn" (click)="onToLogin()">Se connecter</button>
-    </div>
-</ng-template>
+<app-is-not-logged *ngIf="!userId"></app-is-not-logged>

@@ -1,13 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Post, User, Comment } from 'src/app/models/blog.model';
+import { Component, Input, OnInit } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { PostsService } from 'src/app/services/posts.service';
 import { UsersService } from 'src/app/services/users.service';
 import { faHeart, faThumbsDown, faTrash, faPenToSquare, faCrown, faUserGraduate, faUserSlash } from '@fortawesome/free-solid-svg-icons'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommentsService } from 'src/app/services/comments.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -15,6 +12,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./admin-dashboard.component.scss']
 })
 export class AdminDashboardComponent implements OnInit {
+  @Input() infoFromPost!: any;
   // Get current user id and role (admin or not)
   userId!: any;
   isAdmin: boolean = false;
@@ -23,12 +21,10 @@ export class AdminDashboardComponent implements OnInit {
   // Form variables
   userForm!: FormGroup;
   selected: any = null;
-
   myUser!: any;
 
   // Info variables (success, error, loading)
   infoBox: any = {};
-  userInfoBox: boolean = false;
   loading: boolean = true;
 
   // Variables to load child components
@@ -36,13 +32,16 @@ export class AdminDashboardComponent implements OnInit {
   loadEditProfile: boolean = false;
 
   // Main data
-  users$!: Observable<User[]>;
+  users: any = [];
   displayProfile: any = [];
   posts: any = [];
   comments : any = [];
-  comments$!: Observable<Comment[]>;
 
-  users: any = [];
+  // data sent to the comment-list component
+  infoToComment: any = {};
+
+  // data sent to the post-list component
+  infoToPost: any = {};
 
   // FontAwesome icons
   faHeart = faHeart;
@@ -58,12 +57,17 @@ export class AdminDashboardComponent implements OnInit {
     private usersService: UsersService,
     private postsService: PostsService,
     private commentsService: CommentsService,
-    private formBuilder: FormBuilder,
-    private router: Router
+    private formBuilder: FormBuilder
   ) { }
 
   ngOnInit(): void {
     this.loading = true;
+
+    // remove from local storage all keys starting with post-
+    var keys = Object.keys(localStorage).filter(k => k.startsWith('post-'));
+    keys.forEach(k => localStorage.removeItem(k));
+
+    localStorage.removeItem('reportedComments')
 
     // Get current user id and role (admin or not)
     this.authService.checkIsAuth()
@@ -73,10 +77,10 @@ export class AdminDashboardComponent implements OnInit {
         this.isAdmin = this.isAuth.isAdmin;
       })
     .then(() => {
-      // Get all the reported posts
+      // Get the 5 more recent reported posts
       this.loadPosts();
 
-      // Get all the reported comments
+      // Get the 5 more recent reported comments
       this.loadComments();
 
       // Form to select user profile
@@ -87,17 +91,8 @@ export class AdminDashboardComponent implements OnInit {
     .then(() => this.loading = false)
     .catch((e) => {
         this.isAuth = null
-        // this.loading = false;
+        this.loading = false;
     })
-  }
-
-  // On click, loads/unloads the different child components (edit profile, edit posts)
-  loadChildComponent(element: string) {
-    if (element === 'editPost') {
-        this.loadEditPost = !this.loadEditPost
-    } else if (element === 'editProfile') {
-      this.loadEditProfile = !this.loadEditProfile
-    }
   }
 
   loadPosts() {
@@ -109,7 +104,11 @@ export class AdminDashboardComponent implements OnInit {
     this.postsService.getReportedPosts(fields, limit, offset, order)
     .subscribe({
       next: (v) => {
-        this.posts = v;
+        this.posts = v
+
+        // Put postId and totalComments in an array
+        let totalPosts = this.posts.length;
+        this.infoToPost = {totalPosts, 'userId' : this.userId, 'isAdmin' : this.isAdmin};
       },
       error: (e) => console.error(e),
     })
@@ -124,7 +123,11 @@ export class AdminDashboardComponent implements OnInit {
     this.commentsService.getReportedComments(fields, limit, offset, order)
     .subscribe({
       next: (v) => {
-        this.comments = v;
+        this.comments = v
+        
+        // Put postId and totalComments in an array
+        let totalComments = this.comments.length;
+        this.infoToComment = {totalComments, 'userId' : this.userId, 'isAdmin' : this.isAdmin};
       },
       error: (e) => console.error(e),
     })
@@ -154,35 +157,7 @@ export class AdminDashboardComponent implements OnInit {
       }
    }
 
-    // On submit, get the selected user profile
-    onSubmitForm() {
-      this.userForm.reset();
-      this.userInfoBox = false;
-      
-      if (this.selected === null) {
-        this.userInfoBox = true;
-        this.infoBox = {'errorMsg' : `Aucun utilisateur n'a été trouvé`}
-        this.displayProfile = [];
-
-      } else {
-        var userId = this.selected;
-        this.usersService.getOneUser(userId)
-        .subscribe({
-          next: (v) => this.displayProfile = v,
-          error: (e) => {
-            this.userInfoBox = true;
-            this.infoBox = {'errorMsg' : e.error.message}
-          }
-        })
-      }
-    }
-
-  // If the user is not logged in, redirect to the login page
-  onToLogin(): void {
-    this.router.navigateByUrl('login');
-  }
-
-  loadUsers(e: any) {
+   loadUsers(e: any) {
     if(e.target.checked){  
       // Get users information
       this.usersService.getAllUsers()
@@ -197,5 +172,38 @@ export class AdminDashboardComponent implements OnInit {
     } else {
       this.displayProfile = [];
     }
- }
+  }
+
+  // On submit, get the selected user profile
+  onSubmitForm() {
+    this.userForm.reset();
+    
+    if (this.selected === null) {
+      this.infoBox = {'errorMsg' : `Aucun utilisateur n'a été trouvé`, 'origin': 'userDashboard', 'id': 1}
+      this.displayProfile = [];
+
+    } else {
+      var userId = this.selected;
+      this.usersService.getOneUser(userId)
+      .subscribe({
+        next: (v) => this.displayProfile = v,
+        error: (e) => {
+          this.infoBox = {'errorMsg' : e.error.message, 'origin': 'userDashboard', 'id': 1}
+        }
+      })
+    }
+  }
+
+  triggeredFromChildren(eventData: any) {
+    switch(eventData.message) {
+      case 'comment removed':
+        this.comments.length--;
+        break;
+      case 'post removed':
+        this.posts.length--;
+        var postId = eventData.id;
+        document.getElementById(`post-${postId}`)!.remove();
+        break;
+    }
+  }
 }

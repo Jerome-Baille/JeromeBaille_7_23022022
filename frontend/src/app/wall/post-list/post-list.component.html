@@ -1,7 +1,8 @@
+<!-- Loading spinner -->
 <app-loading *ngIf="loading; else loaded"></app-loading>
 
 <ng-template #loaded>
-    <div *ngIf="userId; else denied">
+    <div *ngIf="userId">
         <div class="wall-container">
             <!-- Back to the top button -->
             <button (click)="scrollToTop()" id="myBtn" title="Go to top" [ngClass]="{ 'show-scrollTop': windowScrolled }">
@@ -44,9 +45,4 @@
     </div>
 </ng-template>
 
-<ng-template #denied>
-    <div class="card card--denied">
-        <h2>Veuillez vous connecter pour accéder à cette page</h2>
-        <button class="btn" (click)="onToLogin()">Se connecter</button>
-    </div>
-</ng-template>
+<app-is-not-logged *ngIf="!userId"></app-is-not-logged>

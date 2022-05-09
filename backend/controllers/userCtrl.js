@@ -291,7 +291,6 @@ exports.updateUserProfile = (req, res, next) => {
     var tokenUserId     = req.auth.userId;
     var tokenIsAdmin    = req.auth.isAdmin;
     var paramId         = req.params.id;
-    var username        = req.body.username;
     var email           = req.body.email;
 
 
@@ -390,7 +389,7 @@ exports.updatePassword = (req, res, next) => {
                             password: (password ? bcryptedPassword : user.password)
                         })
                     })
-                    return res.status(201).json({message: `Le mot de passe a été mis à jour avec succès`, user});
+                    return res.status(200).json({message: `Le mot de passe a été mis à jour avec succès`});
                 } else {
                     return res.status(401).json({message : `Le mot de passe doit contenir au moins 8 caractères et être composé d'au moins 1 majuscule, 1 minuscule et 1 chiffre.`});
                 }

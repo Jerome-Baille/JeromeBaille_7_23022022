@@ -3,11 +3,9 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpInterceptor,
-  HttpErrorResponse,
-  HttpHeaders
+  HttpInterceptor
 } from '@angular/common/http';
-import { catchError, Observable, of, retry, switchMap, throwError } from 'rxjs';
+import { catchError, Observable, switchMap, throwError } from 'rxjs';
 import { AuthService } from './services/auth.service';
 
 @Injectable()
@@ -20,7 +18,7 @@ export class AuthGuardInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {    
     return next.handle(req).pipe(catchError(err => {
-      if ([500, 404, 401].includes(err.status)) {
+      if ([500, 404, 401, 400].includes(err.status)) {
         return next.handle(req)
       } else if ([418].includes(err.status)){
         return this.handle418Error(req, next, err);

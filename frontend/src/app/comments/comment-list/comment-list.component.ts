@@ -1,5 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AuthService } from 'src/app/services/auth.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommentsService } from 'src/app/services/comments.service';
 
 @Component({
@@ -8,7 +7,9 @@ import { CommentsService } from 'src/app/services/comments.service';
   styleUrls: ['./comment-list.component.scss']
 })
 export class CommentListComponent implements OnInit {
-  @Input() totalComments!: number;
+  @Input() infoFromPost: any = {};
+
+  @Output() commentListEvent: EventEmitter<any> = new EventEmitter<any>();
 
   // Get current user id and role (admin or not)
   userId!: any;
@@ -20,69 +21,132 @@ export class CommentListComponent implements OnInit {
 
   // Main data variables
   comments!: any;
+  totalComments!: number;
+  postId!: number;
 
   constructor(
-    private commentsService: CommentsService,
-    private authService: AuthService
+    private commentsService: CommentsService
   ) { }
 
   ngOnInit(): void {
     this.loading = true;
 
-    // Get current user id and role (admin or not)
-    this.authService.checkIsAuth()
-    .then((v) => {
-        this.isAuth = v
-        this.userId = this.isAuth.userId;
-        this.isAdmin = this.isAuth.isAdmin;
-      })
-    .then(() => {
-      // remove from local storage all keys starting with post-
-      var keys = Object.keys(localStorage).filter(k => k.startsWith('post-'));
-      keys.forEach(k => localStorage.removeItem(k));
-    })
-    .then(() => {
-      // Load 5 first reported comments
-      this.loadReportedComs();
-      this.loading = false;
-    })
-    .catch((e) => {
-        this.isAuth = null
-        this.loading = false;
-    })
+    // Get the main infos (total comments, post id) from the post
+    if(this.infoFromPost.tempTotalCom){
+      this.totalComments = this.infoFromPost.tempTotalCom;
+    } else {
+      this.totalComments = this.infoFromPost.totalComments;
+    }
+
+    this.postId = this.infoFromPost.postId;
+    this.userId = this.infoFromPost.userId;
+    this.isAdmin = this.infoFromPost.isAdmin;
+
+    // check if there are comments in the local storage
+    var postId = this.postId;
+    var storedCom = JSON.parse(localStorage.getItem(`post-${postId}`)!);
+
+    if(storedCom) {
+      if (storedCom.NewCom || (new Date() > storedCom.ExpirationDate)) {
+        this.loadComs()
+      } else {
+        this.comments = storedCom.Com;
+      }
+    } else {
+      this.loadComs()
+    }
+
+    this.loading = false;
+  }
+
+  ngOnChanges() {
+    if(this.infoFromPost.newComment) {
+      var postId = this.postId;
+      var storedCom = JSON.parse(localStorage.getItem(`post-${postId}`)!);
+
+      if(storedCom) {
+        if (storedCom.NewCom || (new Date() > storedCom.ExpirationDate)) {
+          this.loadComs()
+        } else {
+          this.comments = storedCom.Com;
+        }
+      } 
+    }    
   }
 
   // Get 5 reported comments
-  loadReportedComs() {
+  loadComs() {
+    var postId = this.postId;
+
+    let date = new Date();
+    let ExpInTen = date.setMinutes(date.getMinutes() + 10);
+
     var fields = 'id,content,attachment,isSignaled,points,createdAt,updatedAt,postId';
     var limit = '5';
     var offset = '*';
-    var order = 'createdAt:DESC';
+    var order = 'createdAt:ASC';
 
-    this.commentsService.getReportedComments(fields, limit, offset, order)
+    this.commentsService.getPostComments(postId, fields, limit, offset, order)
     .subscribe({
       next: (v) => {
-        this.comments = v;
+        localStorage.setItem(`post-${postId}`, JSON.stringify({
+          'ExpirationDate' : ExpInTen,
+          'Com' : v
+        }))
+
+        var storedCom = JSON.parse(localStorage.getItem(`post-${postId}`)!);
+
+        this.comments = storedCom.Com
+
+        // Check if there is a new comment (created by current user)
+        if(storedCom.NewCom){
+          let dataConcatenated = this.comments.concat(storedCom.NewCom);
+
+          localStorage.setItem(`post-${postId}`, JSON.stringify({
+            'ExpirationDate': ExpInTen,
+            'Com': dataConcatenated
+          }));
+
+          var storedCom = JSON.parse(localStorage.getItem(`post-${postId}`)!);
+
+          this.comments = storedCom.Com;
+        } 
       },
       error: (e) => console.error(e),
     })
   }
 
-  loadMoreReportedComs() {
+  loadMoreComs() {
+    var postId = this.postId;
     var fields = 'id,content,attachment,isSignaled,points,createdAt,updatedAt,postId';
     var limit = '5';
     var offset = this.comments.length;
-    var order = 'createdAt:DESC';
+    var order = 'createdAt:ASC';
 
-    this.commentsService.getReportedComments(fields, limit, offset, order)
+    this.commentsService.getPostComments(postId,fields, limit, offset, order)
     .subscribe({
       next: (v) => {
         if(v.length != 0) {
           this.comments = this.comments.concat(v);
           console.log('loading more comments')
-          }
+
+          // check if there is comments in the local storage
+          var storedCom = JSON.parse(localStorage.getItem(`post-${postId}`)!);
+          if(storedCom) {
+            storedCom.Com = this.comments;
+            localStorage.setItem(`post-${postId}`, JSON.stringify(storedCom));
+          } 
+        } 
       },
       error: (e) => console.error(e),
     })
+  }
+
+  triggeredFromChildren(eventData: any) {
+    if(eventData.message == 'comment removed') {
+      this.commentListEvent.emit(eventData);
+      this.comments.length--;
+      this.totalComments--;
+    } 
   }
 }

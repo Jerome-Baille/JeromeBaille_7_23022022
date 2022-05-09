@@ -1,10 +1,8 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Post } from '../../models/blog.model';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { PostsService } from '../../services/posts.service';
-import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { faTrash, faPenToSquare, faCircleExclamation, faCircleUp, faCircleDown, faComment, faMessage, faEllipsis, faChevronRight, faChevronLeft, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
-import { CommentsService } from 'src/app/services/comments.service';
+import { Post } from 'src/app/models/post.model';
 
 @Component({
   selector: 'app-post',
@@ -14,6 +12,11 @@ import { CommentsService } from 'src/app/services/comments.service';
 export class PostComponent implements OnInit {
   // Get info from parent component
   @Input() post!: Post;
+
+  @Output() postEmitedData: EventEmitter<any> = new EventEmitter<any>();
+
+  // data sent to the comment component
+  infoToComment: any = {};
 
   // Get current user id and role (admin or not)
   userId!: any;
@@ -57,15 +60,20 @@ export class PostComponent implements OnInit {
 
   constructor(
     private postsService: PostsService,
-    private commentsService: CommentsService,
-    private router: Router,
-    private authService: AuthService) {}
+    private authService: AuthService
+    ) {}
 
   ngOnInit() {
     this.loading = true;
 
     this.userId = this.authService.getUserId();
     this.isAdmin = this.authService.checkIsAdmin();
+
+    // Put postId and totalComments in an array
+    let postId = this.post.id;
+    let totalComments = this.post.Comments.length;
+
+    this.infoToComment = {postId, totalComments, 'userId': this.userId, 'isAdmin': this.isAdmin};
 
     this.loading = false;
   }
@@ -76,8 +84,11 @@ export class PostComponent implements OnInit {
       this.postsService.deleteAPost(this.post.id)
       .subscribe({
         next: (v) => console.log(v),
-        error: (e) => this.infoBox = {'errorMsg' : e.error.message},
-        complete: () => window.location.reload()
+        error: (e) => this.infoBox = {'errorMsg' : e.error.message, 'origin': 'post', 'id': this.post.id},
+        complete: () => {
+          this.postEmitedData.emit({message: 'post removed', id: this.post.id});
+          window.location.reload()
+        }
       })
     }
   }
@@ -168,72 +179,34 @@ export class PostComponent implements OnInit {
 
   // Load child component (edit post, create comment or comments)
   loadChildComponent(src: string) {
-    if (src == "loadEditPost") {
-      this.loadEditPost = !this.loadEditPost;
-    } else if (src == "loadCreateComment") {
-      this.loadCreateComment = !this.loadCreateComment;
-    } else if (src == "loadComments") {
-      if(this.loadComments == false) {
-        this.loadComments = !this.loadComments;
-        this.loadCreateComment = false;
+    switch(src) {
+      case 'loadEditPost':
+        var dropdownCheckBox = document.getElementsByClassName("checkbox");
+        // transform dropdown to array
+        var dropdownArray = Array.prototype.slice.call(dropdownCheckBox);
 
-        var storedCom = JSON.parse(localStorage.getItem(`post-${this.post.id}`)!);
-
-        let date = new Date();
-        let ExpInTen = date.setMinutes(date.getMinutes() + 10);
-
-        // First, check if there is any comments in the local storage
-        if (storedCom) {
-          // Check if there is a new comment (created by current user)
-          if(storedCom.NewCom){
-            this.loadPostComments()
-
-            let dataConcatenated = this.comments.concat(storedCom.NewCom);
-
-            localStorage.setItem(`post-${this.post.id}`, JSON.stringify({
-              'ExpirationDate': ExpInTen,
-              'Com': dataConcatenated
-            }));
-
-            var storedCom = JSON.parse(localStorage.getItem(`post-${this.post.id}`)!);
-
-            this.comments = storedCom.Com;
-          } else {
-            // Check if the comments have reached the expiration date and need to be refreshed
-            if (new Date() > storedCom.ExpirationDate) {
-              this.loadPostComments()
-            } else {
-              this.comments = storedCom.Com;
-            }
+        for (var i = 0; i < dropdownArray.length; i++) {
+          if(dropdownArray[i].id == `chk-${this.post.id}`) {
+            dropdownArray[i].checked = false;
           }
-        } else {
-          this.loadPostComments();
         }
-      } else {
-        this.loadComments = !this.loadComments;
-      }
+
+        this.loadEditPost = !this.loadEditPost;
+        break;
+      case 'loadCreateComment':
+        this.loadCreateComment = !this.loadCreateComment;
+        break;
+      case 'loadComments':
+        if(this.loadComments == false) {
+          this.loadComments = !this.loadComments;
+          this.loadCreateComment = false;
+        } else {
+          this.loadComments = !this.loadComments;
+        }
+        break;
+      default:
+        console.log('Error');
     }
-  }
-
-  // Load the comments of the post
-  loadPostComments() {
-    let date = new Date();
-    let ExpInTen = date.setMinutes(date.getMinutes() + 10);
-
-    this.commentsService.getPostComments(this.post.id)
-          .subscribe({
-            next: (v) => {           
-              localStorage.setItem(`post-${this.post.id}`, JSON.stringify({
-                'ExpirationDate' : ExpInTen,
-                'Com' : v
-              }))
-
-              var storedCom = JSON.parse(localStorage.getItem(`post-${this.post.id}`)!);
-
-              this.comments = storedCom.Com
-            },
-            error: (e) => console.error(e),
-          })
   }
 
 // Check if the user liked/disliked the post
@@ -253,16 +226,25 @@ export class PostComponent implements OnInit {
 
   // Report the post
   onReportPost() {
+    // we start by closing the menu
+    var dropdownCheckBox = document.getElementsByClassName("checkbox");
+    // transform dropdown to array
+    var dropdownArray = Array.prototype.slice.call(dropdownCheckBox);
+
+    for (var i = 0; i < dropdownArray.length; i++) {
+      if(dropdownArray[i].id == `chk-${this.post.id}`) {
+        dropdownArray[i].checked = false;
+      }
+    }
+
     this.postsService.reportAPost(this.post.id)
     .subscribe({
       next: (v) => {
-        this.infoBox = {'infoMsg' : Object.values(v)}
-
+        this.infoBox = {'infoMsg' : Object.values(v), 'origin': 'post', 'id': this.post.id}
         this.post.isSignaled = true;
       },
       error: (e) => {
-        this.infoBox = {'errorMsg' : e.error.message}
-        // this.ngOnInit();
+        this.infoBox = {'errorMsg' : e.error.message, 'origin': 'post', 'id': this.post.id}
       },
       complete: () => this.ngOnInit()
     })
@@ -270,18 +252,30 @@ export class PostComponent implements OnInit {
 
   // Delete the 'reported' status of the post (for admins only)
   onUnreportPost() {
+    // we start by closing the menu 
+    var dropdownCheckBox = document.getElementsByClassName("checkbox");
+    // transform dropdown to array
+    var dropdownArray = Array.prototype.slice.call(dropdownCheckBox);
+
+    for (var i = 0; i < dropdownArray.length; i++) {
+      if(dropdownArray[i].id == `chk-${this.post.id}`) {
+        dropdownArray[i].checked = false;
+      }
+    }
+    
     this.postsService.unreportAPost(this.post.id)
     .subscribe({
       next: (v) => {
-        this.infoBox = {'infoMsg' : Object.values(v)}
-
+        this.infoBox = {'infoMsg' : Object.values(v), 'origin': 'post', 'id': this.post.id}
         this.post.isSignaled = false;
       },
       error: (e) => {
-        this.infoBox = {'errorMsg' : e.error.message}
-        // this.ngOnInit()
+        this.infoBox = {'errorMsg' : e.error.message, 'origin': 'post', 'id': this.post.id}
       },
-      complete: () => this.ngOnInit()
+      complete: () => {
+        this.postEmitedData.emit({message: 'post removed', id: this.post.id});
+        this.ngOnInit()
+      }
     })
   }
 
@@ -315,13 +309,53 @@ export class PostComponent implements OnInit {
   }
 
   triggeredFromChildren(eventData: any) {
-    if(eventData.message == 'post updated') {
-      this.ngOnInit();
-      this.loadEditPost = false;
-      this.infoBox = {'infoMsg' : eventData.info, 'errorMsg' : eventData.error}
-    } else if (eventData.message == 'create a comment') {
-      this.loadCreateComment = false;
-      this.tempTotalCom = this.post.Comments.length +1;
+    switch(eventData.message) {
+      case 'post updated':
+        this.ngOnInit();
+        this.loadEditPost = false;
+        this.infoBox = {'infoMsg' : eventData.info, 'errorMsg' : eventData.error, 'origin': 'post', 'id': this.post.id}
+        break;
+      case 'create a comment':
+        this.loadCreateComment = false;
+
+        this.infoToComment = {...this.infoToComment, 'newComment' : eventData}
+
+        if(this.loadComments==true){
+          this.loadComments = false;
+          setTimeout(() => { this.loadComments = true;}, 50);
+        }
+        
+        if(this.tempTotalCom>= 0) {
+          this.tempTotalCom = this.tempTotalCom +1;
+        } else {
+          this.tempTotalCom = this.post.Comments.length +1;
+        }
+        break;
+      case 'comment removed':
+        if(this.tempTotalCom) {
+          if(this.tempTotalCom== 1) {
+            this.tempTotalCom = this.tempTotalCom -1;
+            this.infoToComment = {...this.infoToComment, 'tempTotalCom' : this.tempTotalCom}
+            this.loadComments = false;
+          } else {
+            this.tempTotalCom = this.tempTotalCom -1;
+            this.infoToComment = {...this.infoToComment, 'tempTotalCom' : this.tempTotalCom}
+          }
+        } else {
+          if(this.post.Comments.length== 1) {
+            this.tempTotalCom = this.post.Comments.length -1;
+            this.infoToComment = {...this.infoToComment, 'tempTotalCom' : this.tempTotalCom}
+            this.loadComments = false;
+          } else {
+            this.tempTotalCom = this.post.Comments.length -1;
+            this.infoToComment = {...this.infoToComment, 'tempTotalCom' : this.tempTotalCom}
+          }
+
+        }
+        break;
+      case 'close update post':
+        this.loadEditPost = !this.loadEditPost;
+        break;
     }
   }
 }
