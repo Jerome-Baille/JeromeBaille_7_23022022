@@ -1,9 +1,21 @@
 // Imports
 const fs              = require ('fs');
+const sharp = require('sharp');
 
 // Models
 const { Post, User, Comment, Like }  = require('../models');
 
+async function resizeImage(input) {
+  try {
+    await sharp(input.path)
+      .resize({
+        width: 150
+      })
+      .toFile('images/' +'thumbnails-' + input.filename);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 // Create a Post
 exports.createPost = (req, res, next) => {
@@ -26,14 +38,20 @@ exports.createPost = (req, res, next) => {
       })
       .then(function(user){
           if (user){
-            req.file !== undefined
-            ? (attachment = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`)
-            : (attachment = null);
+            if(req.file !== undefined){
+              resizeImage(req.file);
+              (attachment = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`);
+              (thumbnail = `${req.protocol}://${req.get('host')}/images/thumbnails-${req.file.filename}`);
+            } else {
+              attachment = null;
+              thumbnail = null;
+            }
 
             Post.create({
               title  : title,
               content: content,
               attachment: attachment,
+              thumbnail: thumbnail,
               UserId : user.id
             })
           .then(function(newPost){
@@ -171,24 +189,30 @@ exports.updatePost = (req, res, next) => {
     .then(function(postFound){
       if (postFound.userId == tokenUserId || tokenIsAdmin == true){
         if (req.file){
-          if (postFound.avatar != null){
+          if (postFound.attachment != null){
             const image = postFound.attachment.split("/images/")[1];
             fs.unlink(`images/${image}`, () => {
-              const postObject = {
-                ...req.body,
-                attachment: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
-              }
-              Post.update(
-                { ...postObject, id: paramId },
-                { where: { id: paramId } }
-              )
-                .then(() => res.status(200).json({ message : `Post modifié avec succès !` }))
-                .catch((err) => res.status(400).json({ message: err }));
+              fs.unlink(`images/thumbnails-${image}`, () => {
+                resizeImage(req.file);
+                const postObject = {
+                  ...req.body,
+                  attachment: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+                  thumbnail: `${req.protocol}://${req.get("host")}/images/thumbnails-${req.file.filename}`
+                }
+                Post.update(
+                  { ...postObject, id: paramId },
+                  { where: { id: paramId } }
+                )
+                  .then(() => res.status(200).json({ message : `Post modifié avec succès !` }))
+                  .catch((err) => res.status(400).json({ message: err }));
+              })
             });
           } else {
+            resizeImage(req.file);
             const postObject = {
               ...req.body,
               attachment: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+              thumbnail: `${req.protocol}://${req.get("host")}/images/thumbnails-${req.file.filename}`
             }
             Post.update(
               { ...postObject, id: paramId },
@@ -233,11 +257,13 @@ exports.removeImage = (req, res, next) => {
         if (postFound.attachment){
           const image = postFound.attachment.split("/images/")[1];
           fs.unlink(`images/${image}`, () => {
-            postFound.update({ 
-              attachment: null 
+            fs.unlink(`images/thumbnails-${image}`, () => {
+              postFound.update({ 
+                attachment: null 
+              })
+                .then(() => res.status(200).json({ message : `Image supprimée !` }))
+                .catch((err) => res.status(400).json({ message: err }));
             })
-              .then(() => res.status(200).json({ message : `Image supprimée !` }))
-              .catch((err) => res.status(400).json({ message: err }));
           })
         } else {
           return res.status(400).json({ message: `Aucune image n'a été trouvée.` })
@@ -267,7 +293,9 @@ exports.deletePost = (req, res, next) => {
         if(postFound.attachment){
           const image = postFound.attachment.split("/images/")[1];
           fs.unlink(`images/${image}`, () => {
-            postFound.destroy()
+            fs.unlink(`images/thumbnails-${image}`, () => {
+              postFound.destroy()
+            })
           })
           return res.status(201).json({ message: `Le post a été supprimé avec succès.` });
         } else {

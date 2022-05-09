@@ -1,7 +1,7 @@
 <div class="card__aside">
     <a class="card__link" routerLink="{{post.id}}">
         <section class="main-content__container">
-            <img class="main-content__img" *ngIf="post.attachment" [src]="post.attachment" alt="{{ post.attachment }}">
+            <img class="main-content__img" *ngIf="post.thumbnail" [src]="post.thumbnail" alt="{{ post.thumbnail }}">
             <p class="main-content__text" *ngIf="post.content">{{ post.content }}</p>  
         </section>
 

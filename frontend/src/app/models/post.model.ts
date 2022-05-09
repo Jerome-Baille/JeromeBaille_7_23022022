@@ -9,6 +9,7 @@ export class Post {
     title!: string;
     content!: string;
     attachment!: string;
+    thumbnail!: string;
     isActive!: boolean;
     isSignaled!: boolean;
     points!: number;

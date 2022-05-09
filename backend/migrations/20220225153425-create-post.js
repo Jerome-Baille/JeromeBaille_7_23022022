@@ -30,6 +30,10 @@ module.exports = {
         allowNull: true,
         type: Sequelize.STRING
       },
+      thumbnail: {
+        allowNull: true,
+        type: Sequelize.STRING
+      },
       isActive: {
         allowNull: false,
         type: Sequelize.BOOLEAN,

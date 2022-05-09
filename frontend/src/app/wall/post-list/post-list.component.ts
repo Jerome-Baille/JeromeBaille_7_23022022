@@ -86,7 +86,7 @@ export class PostListComponent implements OnInit {
 
   // Get the 5 most liked posts
   loadTop5() {
-    var fields = 'id,content,attachment,isActive,points,createdAt,updatedAt';
+    var fields = 'id,content,thumbnail,isActive,points,createdAt,updatedAt';
     var limit = '5';
     var offset = '*';
     var order = 'points:DESC';
