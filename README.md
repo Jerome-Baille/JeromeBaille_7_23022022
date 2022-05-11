@@ -35,7 +35,7 @@ Depuis le terminal :
 - Créez un dossier images (où serons stockées toutes les images uploader par les utilisateurs): `mkdir images`
 - Installer les dépendances : `npm install` 
 
-- Renommer le fichier `.env_exemple` en `.env` et y renseigner les variables d'environnement suivantes pour faire fonctionner l'application :
+- Renommer le fichier `.env_example` en `.env` et y renseigner les variables d'environnement suivantes pour faire fonctionner l'application :
 ACCESS_TOKEN="<votre access token>"
 REFRESH_TOKEN="<votre refresh token>"
 
