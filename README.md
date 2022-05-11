@@ -35,9 +35,9 @@ Depuis le terminal :
 - Créez un dossier images (où serons stockées toutes les images uploader par les utilisateurs): `mkdir images`
 - Installer les dépendances : `npm install` 
 
-- Créez un fichier `.env` et y renseigner les variables d'environnement suivantes pour faire fonctionner l'application :
-ACCESS_TOKEN="RANDOM_TOKEN_SECRET"
-REFRESH_TOKEN="ANOTHER_TOKEN"
+- Renommer le fichier `.env_exemple` en `.env` et y renseigner les variables d'environnement suivantes pour faire fonctionner l'application :
+ACCESS_TOKEN="<votre access token>"
+REFRESH_TOKEN="<votre refresh token>"
 
 (L'access token a une durée de vie de 1h et le refresh token de 30 jours. Lorsque l'access token expire, il est renouvelé grâce au refresh token, permettant à l'utilisateur de rester connecté.)
 
@@ -52,3 +52,7 @@ Dans votre terminal et depuis le dossier "JeromeBaille_7_23022022" :
 - Exécutez la commande : `cd frontend`
 - Puis pour installer les dépendances : `npm install`  
 - Pour lancer le serveur front-end : `ng serve` 
+
+### 4. Création d'un compte administrateur
+- Créer un compte utilisateur grâce à l'interface de l'application
+- Modifiquez le profil de l'utilisateur pour qu'il soit administrateur en changeant la valeur du booléen `isAdmin` à `true` depuis la base de donnée (en utilisant PHPMyAdmin par exemple)
