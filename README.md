@@ -56,3 +56,8 @@ Dans votre terminal et depuis le dossier "JeromeBaille_7_23022022" :
 ### 4. Création d'un compte administrateur
 - Créer un compte utilisateur grâce à l'interface de l'application
 - Modifiquez le profil de l'utilisateur pour qu'il soit administrateur en changeant la valeur du booléen `isAdmin` à `true` depuis la base de donnée (en utilisant PHPMyAdmin par exemple)
+
+Une base de donnée pré-remplie est disponible sur le serveur (database_development.sql), qui permet de tester l'application après importation (en utilisant PHPMyAdmin par exemple).
+En cas d'utilisation de cette base de donnée, un compte administrateur est disponible en utilisant les identifiants suivants :
+    * email : test@test.com
+    * mot de passe : Test2022

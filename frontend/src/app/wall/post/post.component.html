@@ -14,7 +14,7 @@
                 </button>
             </div>
         </section>
-        <main class="main">
+        <section class="main">
             <header class="main__header">
                 <p class="main__header__text">
                     Publié par 
@@ -106,6 +106,6 @@
             </div>
 
             <app-create-a-comment *ngIf="loadComments && !loadCreateComment" [post]="post" (comCreated)="triggeredFromChildren($event)"></app-create-a-comment>
-        </main>
+        </section>
     </div>
 </ng-template>
